@@ -1722,15 +1722,28 @@
       return !keyword || String(value).toLowerCase().includes(keyword.toLowerCase());
     }
 
+    /**
+     * 主表「建立者」：第一行姓名、第二行 PK + 數字（buildMockData 寫入 creatorName／creatorPk）。
+     * 若僅有舊欄位 creator（字串），則整段當作第一行以利相容。
+     */
+    function getCreatorParts(item) {
+      let name = item.creatorName != null ? String(item.creatorName) : "";
+      let pk = item.creatorPk != null ? String(item.creatorPk) : "";
+      name = name.trim();
+      pk = pk.trim();
+      if (!name && !pk && item.creator) {
+        name = String(item.creator).trim();
+      }
+      return { name, pk };
+    }
+
     function creatorSearchText(item) {
-      const name = item.creatorName || "";
-      const pk = item.creatorPk || "";
+      const { name, pk } = getCreatorParts(item);
       return `${name} ${pk}`.trim();
     }
 
     function formatCreatorTableHtml(item) {
-      const name = item.creatorName || "";
-      const pk = item.creatorPk || "";
+      const { name, pk } = getCreatorParts(item);
       if (!name && !pk) {
         return "-";
       }
@@ -1745,8 +1758,7 @@
     }
 
     function formatCreatorCsvValue(item) {
-      const name = item.creatorName || "";
-      const pk = item.creatorPk || "";
+      const { name, pk } = getCreatorParts(item);
       if (!name && !pk) {
         return "-";
       }
