@@ -22,6 +22,8 @@
       --sidebar-w: 248px;
       --sidebar-bg: #ececee;
       --sidebar-border: #d8d8dc;
+      --pager-coral: #f05a66;
+      --pager-gray: #9e9e9e;
     }
 
     * {
@@ -400,28 +402,16 @@
       flex-wrap: wrap;
     }
 
-    .pagination.pagination-main-waterfall {
+    .pagination.pagination-main {
       justify-content: center;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 8px;
+      margin-top: 16px;
     }
 
     .recipient-pagination {
       justify-content: center;
     }
 
-    .waterfall-hint {
-      font-size: 14px;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .table-waterfall {
-      max-height: 480px;
-      overflow-y: auto;
-      overflow-x: auto;
+    .main-table-wrap {
       border-radius: 8px;
       border: 1px solid var(--line);
     }
@@ -430,34 +420,63 @@
     .page-nav {
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
       font-size: 15px;
     }
 
-    .pager-btn,
-    .pager-number {
-      width: 25px;
-      height: 25px;
-      border-radius: 999px;
+    .pager-ring {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      min-height: 40px;
+      border-radius: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1;
+      padding: 0;
+      font-family: inherit;
       background: var(--white);
-      border: 1px solid var(--primary);
-      color: var(--primary);
+      border: 1px solid var(--pager-coral);
+      color: var(--pager-coral);
       cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
     }
 
-    .pager-btn.disabled {
-      border-color: var(--line);
-      color: var(--line);
+    .pager-ring--nav {
+      border-color: var(--pager-gray);
+      color: var(--pager-gray);
+    }
+
+    .pager-ring--nav.is-disabled,
+    .pager-ring--nav:disabled {
+      opacity: 0.42;
       cursor: not-allowed;
     }
 
-    .pager-number.active {
-      background: var(--primary);
+    .pager-ring--page.is-active {
+      background: var(--pager-coral);
       color: var(--white);
+      border-color: var(--pager-coral);
+    }
+
+    .pager-ring--page:not(.is-active):hover {
+      background: rgba(240, 90, 102, 0.08);
+    }
+
+    .pager-ring--nav:not(:disabled):not(.is-disabled):hover {
+      background: rgba(158, 158, 158, 0.12);
+    }
+
+    .pager-ring--ellipsis {
+      cursor: default;
+      user-select: none;
+      letter-spacing: 0.04em;
+      font-size: 14px;
     }
 
     .modal-backdrop {
@@ -718,10 +737,6 @@
       padding-top: 8px;
     }
 
-    .filter-row-hidden {
-      display: none !important;
-    }
-
     .title-preview-cell {
       text-align: left;
       max-width: 220px;
@@ -777,7 +792,7 @@
       <div class="brand">
         <img
           class="brand-logo"
-          src="images.png"
+          src="file:///C:/Users/leowang/.cursor/projects/c-Users-leowang-cursor-projects/assets/c__Users_leowang_AppData_Roaming_Cursor_User_workspaceStorage_aa91ad98f519a14af1466af24533ac3c_images_images-1027f60c-b3e3-4443-9742-3b1ff7e1b341.png"
           alt="口袋證券"
         >
         <div class="brand-env">測試環境</div>
@@ -843,14 +858,6 @@
               <label>發送管道：</label>
               <div class="control"><select id="mainChannel"></select></div>
             </div>
-            <div class="field filter-full filter-row-hidden" id="coupletDateRow">
-              <label>春聯起訖時間：</label>
-              <div class="date-range">
-                <input type="datetime-local" id="mainCoupletStart">
-                <span>～</span>
-                <input type="datetime-local" id="mainCoupletEnd">
-              </div>
-            </div>
             <div class="field">
               <label>發送狀態：</label>
               <div class="control"><select id="mainStatus"></select></div>
@@ -872,7 +879,7 @@
             <div class="count" id="mainPagingInfo"></div>
           </div>
 
-          <div class="table-wrap table-waterfall" id="mainTableScroll">
+          <div class="table-wrap main-table-wrap" id="mainTableWrap">
             <table>
               <thead>
                 <tr>
@@ -892,8 +899,8 @@
             </table>
           </div>
 
-          <div class="pagination pagination-main-waterfall">
-            <div class="waterfall-hint" id="mainWaterfallHint"></div>
+          <div class="pagination pagination-main">
+            <div class="page-nav" id="mainPageNav" aria-label="主清單分頁"></div>
           </div>
         </div>
       </section>
@@ -951,7 +958,7 @@
         </div>
 
         <div class="pagination recipient-pagination">
-          <div class="page-nav" id="recipientPageNav"></div>
+          <div class="page-nav" id="recipientPageNav" aria-label="傳送名單分頁"></div>
         </div>
       </div>
     </div>
@@ -981,8 +988,8 @@
       </div>
       <div class="help-modal-body">
         <ul>
-          <li>請先設定查詢條件後按「查詢」，主清單預設不載入資料；結果以瀑布流向下滑動載入更多。</li>
-          <li>發送管道選擇「APP春聯」時，可另選「春聯起訖時間」篩選；通知時間區間支援日期與時分。</li>
+          <li>請先設定查詢條件後按「查詢」，主清單預設不載入資料；查詢結果每頁 10 筆，可使用分頁切換最前頁、上一頁、頁碼、下一頁、最末頁。</li>
+          <li>通知時間區間支援日期與時分。</li>
           <li>發送狀態為是否打到ＡＰＩ，非用戶是否收到之依據。</li>
           <li>ＭＡＰ識別碼為ＭＡＰ系統對該批次之辨識。</li>
         </ul>
@@ -1030,18 +1037,16 @@
     const statuses = ["全部", "成功", "失敗"];
     const notifications = buildMockData();
 
-    const MAIN_WATERFALL_BATCH = 10;
+    const MAIN_PAGE_SIZE = 10;
 
     const state = {
       main: {
-        pageSize: MAIN_WATERFALL_BATCH,
+        page: 1,
+        pageSize: MAIN_PAGE_SIZE,
         hasSearched: false,
-        waterfallShown: MAIN_WATERFALL_BATCH,
         filters: {
           mapId: "",
           idNo: "",
-          coupletStart: "",
-          coupletEnd: "",
           notifyStart: "",
           notifyEnd: "",
           titleKeyword: "",
@@ -1066,13 +1071,10 @@
       queryTime: document.getElementById("queryTime"),
       mainTableBody: document.getElementById("mainTableBody"),
       mainPagingInfo: document.getElementById("mainPagingInfo"),
-      mainTableScroll: document.getElementById("mainTableScroll"),
-      mainWaterfallHint: document.getElementById("mainWaterfallHint"),
+      mainTableWrap: document.getElementById("mainTableWrap"),
+      mainPageNav: document.getElementById("mainPageNav"),
       mainMapId: document.getElementById("mainMapId"),
       mainIdNo: document.getElementById("mainIdNo"),
-      coupletDateRow: document.getElementById("coupletDateRow"),
-      mainCoupletStart: document.getElementById("mainCoupletStart"),
-      mainCoupletEnd: document.getElementById("mainCoupletEnd"),
       mainNotifyStart: document.getElementById("mainNotifyStart"),
       mainNotifyEnd: document.getElementById("mainNotifyEnd"),
       mainTitleKeyword: document.getElementById("mainTitleKeyword"),
@@ -1113,18 +1115,8 @@
     function init() {
       fillSelect(dom.mainChannel, channels);
       fillSelect(dom.mainStatus, statuses);
-      updateCoupletRowVisibility();
       bindEvents();
       renderMainTable();
-    }
-
-    function updateCoupletRowVisibility() {
-      const show = dom.mainChannel.value === "APP春聯";
-      dom.coupletDateRow.classList.toggle("filter-row-hidden", !show);
-      if (!show) {
-        dom.mainCoupletStart.value = "";
-        dom.mainCoupletEnd.value = "";
-      }
     }
 
     function showGuild3Reminder(title, message) {
@@ -1141,24 +1133,17 @@
     }
 
     function bindEvents() {
-      dom.mainChannel.addEventListener("change", () => {
-        updateCoupletRowVisibility();
-      });
-
       dom.searchMainBtn.addEventListener("click", () => {
         syncMainFiltersFromDom();
         state.main.hasSearched = true;
-        state.main.waterfallShown = MAIN_WATERFALL_BATCH;
+        state.main.page = 1;
         renderMainTable();
-        dom.mainTableScroll.scrollTop = 0;
       });
 
       dom.resetMainBtn.addEventListener("click", () => {
         state.main.filters = {
           mapId: "",
           idNo: "",
-          coupletStart: "",
-          coupletEnd: "",
           notifyStart: "",
           notifyEnd: "",
           titleKeyword: "",
@@ -1167,32 +1152,9 @@
           creator: ""
         };
         state.main.hasSearched = false;
-        state.main.waterfallShown = MAIN_WATERFALL_BATCH;
+        state.main.page = 1;
         syncMainFiltersToDom();
-        updateCoupletRowVisibility();
         renderMainTable();
-        dom.mainTableScroll.scrollTop = 0;
-      });
-
-      dom.mainTableScroll.addEventListener("scroll", () => {
-        if (!state.main.hasSearched) {
-          return;
-        }
-        const el = dom.mainTableScroll;
-        const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 80;
-        if (!nearBottom) {
-          return;
-        }
-        const filtered = getFilteredNotifications();
-        if (state.main.waterfallShown >= filtered.length) {
-          return;
-        }
-        state.main.waterfallShown = Math.min(
-          filtered.length,
-          state.main.waterfallShown + MAIN_WATERFALL_BATCH
-        );
-        renderMainTableBody(filtered);
-        updateMainWaterfallHint(filtered.length);
       });
 
       dom.exportMainBtn.addEventListener("click", () => {
@@ -1336,8 +1298,13 @@
 
       switch (ch) {
         case "APP離線推播":
-        case "APP春聯":
           textRow("主旨：", n.subject);
+          textRow("內文：", n.content);
+          textRow("到達網頁：", n.landingUrl);
+          break;
+        case "APP春聯":
+          textRow("外層主旨：", n.notifyTitle);
+          textRow("內容主旨：", n.subject);
           textRow("內文：", n.content);
           textRow("到達網頁：", n.landingUrl);
           break;
@@ -1412,45 +1379,7 @@
       return true;
     }
 
-    function coupletDatetimeOverlaps(item, rangeStart, rangeEnd) {
-      if (!rangeStart && !rangeEnd) {
-        return true;
-      }
-      if (item.channel !== "APP春聯" || !item.coupletStartDT || !item.coupletEndDT) {
-        return false;
-      }
-      const rs = datetimeLocalToSortable(rangeStart) || "0000-01-01T00:00:00";
-      const re = datetimeLocalToSortable(rangeEnd) || "9999-12-31T23:59:59";
-      return item.coupletStartDT <= re && item.coupletEndDT >= rs;
-    }
-
-    function updateMainWaterfallHint(total) {
-      if (!state.main.hasSearched) {
-        dom.mainWaterfallHint.textContent = "";
-        return;
-      }
-      const shown = Math.min(state.main.waterfallShown, total);
-      if (total === 0) {
-        dom.mainWaterfallHint.textContent = "";
-        return;
-      }
-      if (shown >= total) {
-        dom.mainWaterfallHint.textContent = `已顯示全部 ${total} 筆（瀑布流載入完畢）`;
-      } else {
-        dom.mainWaterfallHint.textContent = `已顯示 ${shown} / 共 ${total} 筆 · 向下滑動載入更多（瀑布流）`;
-      }
-    }
-
-    function renderMainTableBody(filtered) {
-      const pageRows = filtered.slice(0, state.main.waterfallShown);
-      if (!pageRows.length) {
-        dom.mainTableBody.innerHTML = `
-          <tr>
-            <td colspan="10"><div class="empty">查無符合條件的通知紀錄。</div></td>
-          </tr>
-        `;
-        return;
-      }
+    function renderMainTableRows(pageRows) {
       dom.mainTableBody.innerHTML = pageRows.map((item) => `
         <tr>
           <td>${escHtml(item.mapId)}</td>
@@ -1485,18 +1414,37 @@
             <td colspan="10"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
           </tr>
         `;
-        dom.mainWaterfallHint.textContent = "";
+        dom.mainPageNav.innerHTML = "";
         return;
       }
 
       const filtered = getFilteredNotifications();
-      if (state.main.waterfallShown > filtered.length) {
-        state.main.waterfallShown = filtered.length;
+      const total = filtered.length;
+      const totalPages = total === 0 ? 0 : getTotalPages(total, state.main.pageSize);
+      if (totalPages > 0) {
+        state.main.page = Math.min(Math.max(1, state.main.page), totalPages);
+      } else {
+        state.main.page = 1;
       }
       dom.queryTime.textContent = `查詢時間：${formatNow()}`;
-      dom.mainPagingInfo.innerHTML = `共有 <strong>${filtered.length}</strong> 筆資料`;
-      renderMainTableBody(filtered);
-      updateMainWaterfallHint(filtered.length);
+      dom.mainPagingInfo.innerHTML = `共有 <strong>${total}</strong> 筆資料`;
+
+      if (total === 0) {
+        dom.mainTableBody.innerHTML = `
+          <tr>
+            <td colspan="10"><div class="empty">查無符合條件的通知紀錄。</div></td>
+          </tr>
+        `;
+        dom.mainPageNav.innerHTML = "";
+        return;
+      }
+
+      const pageRows = paginate(filtered, state.main.page, state.main.pageSize);
+      renderMainTableRows(pageRows);
+      renderCircularPageNav(dom.mainPageNav, state.main.page, totalPages, (page) => {
+        state.main.page = page;
+        renderMainTable();
+      });
     }
 
     function renderRecipientTable() {
@@ -1511,7 +1459,7 @@
             <td colspan="4"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
           </tr>
         `;
-        renderPageNav(dom.recipientPageNav, 1, 1, () => {});
+        dom.recipientPageNav.innerHTML = "";
         return;
       }
 
@@ -1538,58 +1486,90 @@
         `).join("");
       }
 
-      renderPageNav(dom.recipientPageNav, state.recipient.page, totalPages, (page) => {
+      renderCircularPageNav(dom.recipientPageNav, state.recipient.page, totalPages, (page) => {
         state.recipient.page = page;
         renderRecipientTable();
       });
     }
 
-    function renderPageNav(container, currentPage, totalPages, onChange) {
-      const pages = buildPageList(currentPage, totalPages);
-      container.innerHTML = "";
-
-      const prev = document.createElement("button");
-      prev.className = `pager-btn ${currentPage === 1 ? "disabled" : ""}`;
-      prev.textContent = "<";
-      prev.disabled = currentPage === 1;
-      prev.addEventListener("click", () => {
-        if (currentPage > 1) {
-          onChange(currentPage - 1);
-        }
-      });
-      container.appendChild(prev);
-
-      pages.forEach((page) => {
-        const el = document.createElement("button");
-        el.className = `pager-number ${page === currentPage ? "active" : ""}`;
-        el.textContent = page;
-        el.addEventListener("click", () => onChange(page));
-        container.appendChild(el);
-      });
-
-      const next = document.createElement("button");
-      next.className = `pager-btn ${currentPage === totalPages ? "disabled" : ""}`;
-      next.textContent = ">";
-      next.disabled = currentPage === totalPages;
-      next.addEventListener("click", () => {
-        if (currentPage < totalPages) {
-          onChange(currentPage + 1);
-        }
-      });
-      container.appendChild(next);
-    }
-
-    function buildPageList(currentPage, totalPages) {
-      if (totalPages <= 5) {
+    /**
+     * 產生分頁中間之頁碼與省略符（與常見後台分頁一致）。
+     * @returns {(number | "...")[]}
+     */
+    function buildPageNavItems(currentPage, totalPages) {
+      if (totalPages <= 0) {
+        return [];
+      }
+      if (totalPages <= 7) {
         return Array.from({ length: totalPages }, (_, i) => i + 1);
       }
-      if (currentPage <= 3) {
-        return [1, 2, 3, 4, 5];
+      const delta = 2;
+      const range = [];
+      for (let i = 1; i <= totalPages; i += 1) {
+        if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+          range.push(i);
+        }
       }
-      if (currentPage >= totalPages - 2) {
-        return [totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      const out = [];
+      let prev = 0;
+      for (const i of range) {
+        if (prev) {
+          if (i - prev === 2) {
+            out.push(prev + 1);
+          } else if (i - prev > 1) {
+            out.push("...");
+          }
+        }
+        out.push(i);
+        prev = i;
       }
-      return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
+      return out;
+    }
+
+    function renderCircularPageNav(container, currentPage, totalPages, onChange) {
+      container.innerHTML = "";
+      if (totalPages < 1) {
+        return;
+      }
+
+      const appendNav = (label, text, disabled, go) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `pager-ring pager-ring--nav${disabled ? " is-disabled" : ""}`;
+        btn.textContent = text;
+        btn.setAttribute("aria-label", label);
+        btn.disabled = disabled;
+        btn.addEventListener("click", () => {
+          if (!disabled) {
+            go();
+          }
+        });
+        container.appendChild(btn);
+      };
+
+      appendNav("最前頁", "«", currentPage === 1, () => onChange(1));
+      appendNav("上一頁", "‹", currentPage === 1, () => onChange(currentPage - 1));
+
+      buildPageNavItems(currentPage, totalPages).forEach((item) => {
+        if (item === "...") {
+          const span = document.createElement("span");
+          span.className = "pager-ring pager-ring--ellipsis";
+          span.textContent = "...";
+          span.setAttribute("aria-hidden", "true");
+          container.appendChild(span);
+        } else {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `pager-ring pager-ring--page${item === currentPage ? " is-active" : ""}`;
+          btn.textContent = String(item);
+          btn.setAttribute("aria-label", `第 ${item} 頁`);
+          btn.addEventListener("click", () => onChange(item));
+          container.appendChild(btn);
+        }
+      });
+
+      appendNav("下一頁", "›", currentPage === totalPages, () => onChange(currentPage + 1));
+      appendNav("最末頁", "»", currentPage === totalPages, () => onChange(totalPages));
     }
 
     function openRecipientModal(notificationId) {
@@ -1646,11 +1626,6 @@
         if (idQ && !item.recipients.some((r) => includesText(r.idNo, idQ))) {
           return false;
         }
-        if (filters.channel === "APP春聯" && (filters.coupletStart || filters.coupletEnd)) {
-          if (!coupletDatetimeOverlaps(item, filters.coupletStart, filters.coupletEnd)) {
-            return false;
-          }
-        }
         if (!matchesNotifyTimeRange(item, filters.notifyStart, filters.notifyEnd)) {
           return false;
         }
@@ -1681,8 +1656,6 @@
       state.main.filters = {
         mapId: dom.mainMapId.value.trim(),
         idNo: dom.mainIdNo.value.trim(),
-        coupletStart: dom.mainCoupletStart.value,
-        coupletEnd: dom.mainCoupletEnd.value,
         notifyStart: dom.mainNotifyStart.value,
         notifyEnd: dom.mainNotifyEnd.value,
         titleKeyword: dom.mainTitleKeyword.value.trim(),
@@ -1695,8 +1668,6 @@
     function syncMainFiltersToDom() {
       dom.mainMapId.value = state.main.filters.mapId;
       dom.mainIdNo.value = state.main.filters.idNo;
-      dom.mainCoupletStart.value = state.main.filters.coupletStart;
-      dom.mainCoupletEnd.value = state.main.filters.coupletEnd;
       dom.mainNotifyStart.value = state.main.filters.notifyStart;
       dom.mainNotifyEnd.value = state.main.filters.notifyEnd;
       dom.mainTitleKeyword.value = state.main.filters.titleKeyword;
