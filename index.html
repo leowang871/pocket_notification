@@ -3,22 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>通知中心紀錄後台</title>
+  <title>提醒 — STYLEGUILD3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap");
-
     :root {
-      --primary: #e95465;
-      --primary-soft: #fbe3e3;
-      --row-soft: #eeeeef;
-      --row-alt: #fff2f2;
       --line: #9e9e9f;
-      --text: #111111;
-      --muted: #6b7280;
-      --bg: #f6f6f7;
+      --primary: #e95465;
+      --text: #000000;
       --white: #ffffff;
-      --shadow: 3px 5px 10px rgba(0, 0, 0, 0.1);
-      --radius: 10px;
+      --radius: 8px;
+      --shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
     }
 
     * {
@@ -27,1323 +23,129 @@
 
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8e8ea;
       font-family: "Noto Sans TC", sans-serif;
     }
 
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    .layout {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 196px minmax(0, 1fr);
-      grid-template-rows: 60px 1fr;
-      grid-template-areas:
-        "topbar topbar"
-        "sidebar main";
-    }
-
-    .topbar {
-      grid-area: topbar;
-      height: 60px;
-      background: var(--white);
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .brand-logo {
-      height: 40px;
-      width: auto;
-      display: block;
-    }
-
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 16px;
-    }
-
-    .brand-env {
-      font-size: 18px;
-      font-weight: 500;
-      color: #3e3a39;
-    }
-
-    .sidebar {
-      grid-area: sidebar;
-      background: var(--white);
-      box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.15);
-      padding: 18px 12px 28px;
-    }
-
-    .sidebar-inner {
+    /* 來源：STYLEGUILD3 — 480px 提醒對話框 */
+    .guild3-dialog {
+      width: 480px;
+      max-width: calc(100vw - 32px);
       display: flex;
       flex-direction: column;
-      gap: 4px;
-    }
-
-    .nav-item,
-    .nav-group-title,
-    .nav-sub-item {
-      display: flex;
-      align-items: center;
-      min-height: 38px;
-      color: var(--text);
-    }
-
-    .nav-item,
-    .nav-group-title {
-      font-size: 16px;
-      font-weight: 500;
-    }
-
-    .nav-group-title {
-      margin-top: 6px;
-    }
-
-    .nav-sub-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding-left: 16px;
-      margin-bottom: 8px;
-    }
-
-    .nav-sub-item {
-      font-size: 15px;
-      line-height: 1.45;
-    }
-
-    .nav-sub-item.active {
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    .main {
-      grid-area: main;
-      padding: 18px 22px 32px 28px;
-      overflow-x: auto;
-    }
-
-    .main-inner {
-      width: min(100%, 1380px);
-      margin: 0;
-    }
-
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 18px;
-      margin-bottom: 0;
-    }
-
-    .page-card {
+      align-items: stretch;
       background: var(--white);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 28px 32px 32px;
-    }
-
-    .page-title {
-      margin: 0 0 20px;
-      font-size: 32px;
-      font-weight: 900;
-    }
-
-    .section {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px 20px;
-    }
-
-    .filter-full {
-      grid-column: 1 / -1;
-    }
-
-    .field {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .field label {
-      width: 128px;
-      flex: 0 0 128px;
-      font-size: 16px;
-    }
-
-    .control,
-    .date-range {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .control input,
-    .control select,
-    .date-range input,
-    .page-size select {
-      width: 100%;
-      min-height: 40px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--white);
-      padding: 6px 10px;
-      font-size: 15px;
-    }
-
-    .date-range span {
-      font-size: 16px;
-      font-weight: 500;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      min-width: 120px;
-      height: 40px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
-      border: 1px solid var(--primary);
-      transition: 0.2s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: var(--white);
-    }
-
-    .btn-secondary {
-      background: var(--white);
-      color: var(--primary);
-    }
-
-    .summary-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 16px;
-      flex-wrap: wrap;
-      font-size: 15px;
-    }
-
-    .summary-bar .count strong {
-      color: var(--primary);
-      font-weight: 500;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: 8px;
-    }
-
-    table {
-      width: 100%;
-      min-width: 1220px;
-      border-collapse: separate;
-      border-spacing: 0 4px;
-      font-size: 14px;
-    }
-
-    th,
-    td {
-      padding: 8px 10px;
-      text-align: center;
-      vertical-align: middle;
-    }
-
-    thead th {
-      background: var(--primary-soft);
-      font-size: 15px;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    tbody tr:nth-child(odd) td {
-      background: var(--row-soft);
-    }
-
-    tbody tr:nth-child(even) td {
-      background: var(--row-alt);
-    }
-
-    .subject-cell,
-    .content-cell {
-      text-align: left;
-    }
-
-    .underlined {
-      text-decoration: underline;
-    }
-
-    .subject-link {
-      border: 0;
-      background: transparent;
-      padding: 0;
-      color: inherit;
-      font: inherit;
-      text-decoration: underline;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .mini-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 68px;
-      min-height: 30px;
-      padding: 4px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--primary);
-      background: var(--white);
-      color: var(--primary);
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 72px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 500;
-      background: var(--white);
-      border: 1px solid var(--line);
-    }
-
-    .status-success {
-      color: #15803d;
-      border-color: #15803d;
-    }
-
-    .status-warning {
-      color: #c2410c;
-      border-color: #fb923c;
-    }
-
-    .status-danger {
-      color: #b91c1c;
-      border-color: #ef4444;
-    }
-
-    .status-info {
-      color: #0369a1;
-      border-color: #38bdf8;
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .page-size,
-    .page-nav {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 15px;
-    }
-
-    .pager-btn,
-    .pager-number {
-      width: 25px;
-      height: 25px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      background: var(--white);
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      cursor: pointer;
-    }
-
-    .pager-btn.disabled {
-      border-color: var(--line);
-      color: var(--line);
-      cursor: not-allowed;
-    }
-
-    .pager-number.active {
-      background: var(--primary);
-      color: var(--white);
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.25);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      z-index: 30;
-    }
-
-    .modal-backdrop.show {
-      display: flex;
-    }
-
-    .modal {
-      width: min(1120px, calc(100vw - 48px));
-      max-height: 90vh;
-      overflow: auto;
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: 3px 5px 10px rgba(0, 0, 0, 0.18);
-      padding: 28px;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .modal-title {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 900;
-    }
-
-    .modal-subtitle {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .empty {
-      background: var(--row-soft);
-      border-radius: 8px;
-      padding: 24px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .message-modal {
-      width: min(800px, calc(100vw - 48px));
-      padding: 0;
       overflow: hidden;
     }
 
-    .message-modal-header {
-      background: #fb5868;
-      color: var(--white);
-      min-height: 48px;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
+    .guild3-dialog__header {
+      height: 56px;
+      display: flex;
       align-items: center;
-      padding: 0 16px;
-    }
-
-    .message-modal-title {
-      grid-column: 2;
-      text-align: center;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .message-close-icon {
-      grid-column: 3;
-      justify-self: end;
-      border: 0;
-      background: transparent;
-      color: var(--white);
-      font-size: 28px;
-      line-height: 1;
-      cursor: pointer;
-    }
-
-    .message-modal-body {
-      padding: 28px 30px 28px;
+      justify-content: center;
       background: var(--white);
+      border-radius: var(--radius) var(--radius) 0 0;
     }
 
-    .message-field {
-      margin-bottom: 24px;
-      font-size: 16px;
-      line-height: 1.7;
-      white-space: pre-wrap;
-    }
-
-    .message-label {
+    .guild3-dialog__title {
+      margin: 0;
+      font-size: 20px;
       font-weight: 500;
+      color: var(--text);
+      text-align: center;
     }
 
-    .message-modal-actions {
+    .guild3-dialog__rule {
+      height: 0;
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 0;
+    }
+
+    .guild3-dialog__body {
+      padding: 32px 40px 0;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .guild3-dialog__message {
+      margin: 0;
+      width: 100%;
+      min-height: 75px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .guild3-dialog__footer {
+      padding: 24px 40px 32px;
+      background: var(--white);
+      border-radius: 0 0 var(--radius) var(--radius);
       display: flex;
       justify-content: center;
-      padding-top: 8px;
+      align-items: center;
     }
 
-    @media (max-width: 1280px) {
-      .layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: 60px auto 1fr;
-        grid-template-areas:
-          "topbar"
-          "sidebar"
-          "main";
-      }
-
-      .sidebar {
-        padding: 14px 16px;
-      }
+    .guild3-dialog__btn {
+      width: 140px;
+      height: 40px;
+      padding: 9px 16px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.1s ease;
     }
 
-    @media (max-width: 960px) {
-      .page-card,
-      .modal {
-        padding: 20px 16px;
-      }
+    .guild3-dialog__btn:hover {
+      filter: brightness(1.05);
+    }
 
-      .filter-grid {
-        grid-template-columns: 1fr;
-      }
+    .guild3-dialog__btn:active {
+      transform: scale(0.98);
+    }
 
-      .field,
-      .summary-bar,
-      .modal-header,
-      .pagination {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .field label {
-        width: auto;
-        flex: initial;
-      }
-
-      .main-inner {
-        width: 100%;
-      }
+    .guild3-dialog__btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
   </style>
 </head>
 <body>
-  <div class="layout">
-    <header class="topbar">
-      <div class="brand">
-        <img
-          class="brand-logo"
-          src="main/images.png"
-          alt="口袋證券"
-        >
-        <div class="brand-env">測試環境</div>
-      </div>
-      <div class="topbar-actions">
-        <div>最高權限者 pk099，您好</div>
-        <button class="btn btn-secondary" style="min-width: 100px; height: 35px;">登出</button>
-      </div>
+  <div
+    class="guild3-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="guild3-title"
+    aria-describedby="guild3-desc"
+  >
+    <header class="guild3-dialog__header">
+      <h1 id="guild3-title" class="guild3-dialog__title">提醒</h1>
     </header>
-
-    <aside class="sidebar">
-      <div class="sidebar-inner">
-        <div class="nav-item">首頁</div>
-        <div class="nav-item">審核</div>
-        <div class="nav-item">客戶管理</div>
-        <div class="nav-item">資料查詢</div>
-        <div class="nav-item">商品檔</div>
-        <div class="nav-group-title">推播訊息</div>
-        <div class="nav-sub-list">
-          <div class="nav-sub-item">人工推播(App離線推播)</div>
-          <div class="nav-sub-item">人工推播(簡訊)</div>
-          <div class="nav-sub-item">人工推播(email)</div>
-          <div class="nav-sub-item">文宣上架</div>
-          <div class="nav-sub-item">App 通知中心</div>
-          <div class="nav-sub-item active">推播紀錄</div>
-        </div>
-      </div>
-    </aside>
-
-    <main class="main">
-      <div class="main-inner">
-      <section class="page-card">
-        <h1 class="page-title">通知紀錄</h1>
-
-        <div class="section">
-          <div class="filter-grid">
-            <div class="field">
-              <label>編號：</label>
-              <div class="control"><input type="text" id="mainSerial" placeholder="搜尋編號"></div>
-            </div>
-            <div class="field filter-full">
-              <label>通知時間區間：</label>
-              <div class="date-range">
-                <input type="date" id="mainStartDate">
-                <span>～</span>
-                <input type="date" id="mainEndDate">
-              </div>
-            </div>
-            <div class="field">
-              <label>通知主旨：</label>
-              <div class="control"><input type="text" id="mainSubject" placeholder="搜尋關鍵字查詢"></div>
-            </div>
-            <div class="field">
-              <label>通知內文：</label>
-              <div class="control"><input type="text" id="mainContentKeyword" placeholder="搜尋內文關鍵字"></div>
-            </div>
-            <div class="field">
-              <label>發送管道：</label>
-              <div class="control"><select id="mainChannel"></select></div>
-            </div>
-            <div class="field">
-              <label>發送狀態：</label>
-              <div class="control"><select id="mainStatus"></select></div>
-            </div>
-            <div class="field filter-full">
-              <label>建立者 / 來源：</label>
-              <div class="control"><input type="text" id="mainCreator" placeholder="搜尋建立者或來源"></div>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn btn-secondary" id="resetMainBtn">清除</button>
-            <button class="btn btn-primary" id="searchMainBtn">查詢</button>
-            <button class="btn btn-secondary" id="exportMainBtn">匯出主清單</button>
-          </div>
-
-          <div class="summary-bar">
-            <div id="queryTime"></div>
-            <div class="count" id="mainPagingInfo"></div>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>編號</th>
-                  <th>通知時間</th>
-                  <th>通知主旨</th>
-                  <th>通知內文</th>
-                  <th>發送管道</th>
-                  <th>發送總數</th>
-                  <th>發送失敗數</th>
-                  <th>建立者</th>
-                  <th>發送狀態</th>
-                  <th>傳送名單</th>
-                </tr>
-              </thead>
-              <tbody id="mainTableBody"></tbody>
-            </table>
-          </div>
-
-          <div class="pagination">
-            <div class="page-size">
-              <span>每頁筆數</span>
-              <select id="mainPageSize">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
-            <div class="page-nav" id="mainPageNav"></div>
-          </div>
-        </div>
-      </section>
-      </div>
-    </main>
-  </div>
-
-  <div class="modal-backdrop" id="recipientModal">
-    <div class="modal">
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title" id="modalTitle">傳送名單</h2>
-          <p class="modal-subtitle" id="modalSubtitle"></p>
-        </div>
-        <div class="actions">
-          <button class="btn btn-secondary" id="exportRecipientsBtn">匯出名單</button>
-          <button class="btn btn-primary" id="closeModalBtn">關閉</button>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="filter-grid">
-          <div class="field">
-            <label>身分證：</label>
-            <div class="control"><input type="text" id="recipientIdNo" placeholder="搜尋身分證字號"></div>
-          </div>
-          <div class="field">
-            <label>姓名：</label>
-            <div class="control"><input type="text" id="recipientName" placeholder="搜尋姓名"></div>
-          </div>
-          <div class="field">
-            <label>帳號：</label>
-            <div class="control"><input type="text" id="recipientAccount" placeholder="搜尋帳號"></div>
-          </div>
-          <div class="field">
-            <label>發送狀態：</label>
-            <div class="control"><select id="recipientStatus"></select></div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="btn btn-secondary" id="resetRecipientsBtn">清除</button>
-          <button class="btn btn-primary" id="searchRecipientsBtn">查詢</button>
-        </div>
-
-        <div class="summary-bar">
-          <div></div>
-          <div class="count" id="recipientPagingInfo"></div>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>序號</th>
-                <th>身分證</th>
-                <th>姓名</th>
-                <th>帳號</th>
-                <th>發送狀態</th>
-              </tr>
-            </thead>
-            <tbody id="recipientTableBody"></tbody>
-          </table>
-        </div>
-
-        <div class="pagination">
-          <div class="page-size">
-            <span>每頁筆數</span>
-            <select id="recipientPageSize">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-          <div class="page-nav" id="recipientPageNav"></div>
-        </div>
-      </div>
+    <hr class="guild3-dialog__rule" />
+    <div class="guild3-dialog__body">
+      <p id="guild3-desc" class="guild3-dialog__message">送出成功</p>
     </div>
+    <footer class="guild3-dialog__footer">
+      <button type="button" class="guild3-dialog__btn" id="guild3Confirm">確認</button>
+    </footer>
   </div>
-
-  <div class="modal-backdrop" id="messageModal">
-    <div class="modal message-modal">
-      <div class="message-modal-header">
-        <div></div>
-        <div class="message-modal-title">提醒</div>
-        <button class="message-close-icon" id="messageCloseIcon" aria-label="關閉">&times;</button>
-      </div>
-      <div class="message-modal-body">
-        <div class="message-field"><span class="message-label">標題：</span><span id="messageSubject"></span></div>
-        <div class="message-field"><span class="message-label">內容：</span><br><span id="messageContent"></span></div>
-        <div class="message-modal-actions">
-          <button class="btn btn-primary" id="messageConfirmBtn">確認</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const channels = ["全部", "APP跑馬燈", "APP春聯", "APP通知", "Email", "LINE@", "LON"];
-    const statuses = ["全部", "成功", "失敗"];
-    const recipientStatuses = ["全部", "成功", "失敗"];
-    const notifications = buildMockData();
-
-    const state = {
-      main: {
-        page: 1,
-        pageSize: 10,
-        filters: {
-          serial: "",
-          startDate: "",
-          endDate: "",
-          subject: "",
-          contentKeyword: "",
-          channel: "全部",
-          status: "全部",
-          creator: ""
-        }
-      },
-      recipient: {
-        notification: null,
-        page: 1,
-        pageSize: 10,
-        filters: {
-          idNo: "",
-          name: "",
-          account: "",
-          status: "全部"
-        }
-      }
-    };
-
-    const dom = {
-      queryTime: document.getElementById("queryTime"),
-      mainTableBody: document.getElementById("mainTableBody"),
-      mainPagingInfo: document.getElementById("mainPagingInfo"),
-      mainPageNav: document.getElementById("mainPageNav"),
-      mainPageSize: document.getElementById("mainPageSize"),
-      mainSerial: document.getElementById("mainSerial"),
-      mainStartDate: document.getElementById("mainStartDate"),
-      mainEndDate: document.getElementById("mainEndDate"),
-      mainSubject: document.getElementById("mainSubject"),
-      mainContentKeyword: document.getElementById("mainContentKeyword"),
-      mainChannel: document.getElementById("mainChannel"),
-      mainStatus: document.getElementById("mainStatus"),
-      mainCreator: document.getElementById("mainCreator"),
-      searchMainBtn: document.getElementById("searchMainBtn"),
-      resetMainBtn: document.getElementById("resetMainBtn"),
-      exportMainBtn: document.getElementById("exportMainBtn"),
-      messageModal: document.getElementById("messageModal"),
-      messageSubject: document.getElementById("messageSubject"),
-      messageContent: document.getElementById("messageContent"),
-      messageCloseIcon: document.getElementById("messageCloseIcon"),
-      messageConfirmBtn: document.getElementById("messageConfirmBtn"),
-      recipientModal: document.getElementById("recipientModal"),
-      modalTitle: document.getElementById("modalTitle"),
-      modalSubtitle: document.getElementById("modalSubtitle"),
-      closeModalBtn: document.getElementById("closeModalBtn"),
-      exportRecipientsBtn: document.getElementById("exportRecipientsBtn"),
-      recipientIdNo: document.getElementById("recipientIdNo"),
-      recipientName: document.getElementById("recipientName"),
-      recipientAccount: document.getElementById("recipientAccount"),
-      recipientStatus: document.getElementById("recipientStatus"),
-      searchRecipientsBtn: document.getElementById("searchRecipientsBtn"),
-      resetRecipientsBtn: document.getElementById("resetRecipientsBtn"),
-      recipientTableBody: document.getElementById("recipientTableBody"),
-      recipientPagingInfo: document.getElementById("recipientPagingInfo"),
-      recipientPageNav: document.getElementById("recipientPageNav"),
-      recipientPageSize: document.getElementById("recipientPageSize")
-    };
-
-    init();
-
-    function init() {
-      fillSelect(dom.mainChannel, channels);
-      fillSelect(dom.mainStatus, statuses);
-      fillSelect(dom.recipientStatus, recipientStatuses);
-      bindEvents();
-      renderMainTable();
-    }
-
-    function bindEvents() {
-      dom.searchMainBtn.addEventListener("click", () => {
-        state.main.page = 1;
-        syncMainFiltersFromDom();
-        renderMainTable();
-      });
-
-      dom.resetMainBtn.addEventListener("click", () => {
-        state.main.filters = {
-          serial: "",
-          startDate: "",
-          endDate: "",
-          subject: "",
-          contentKeyword: "",
-          channel: "全部",
-          status: "全部",
-          creator: ""
-        };
-        state.main.page = 1;
-        syncMainFiltersToDom();
-        renderMainTable();
-      });
-
-      dom.exportMainBtn.addEventListener("click", () => {
-        exportCsv("通知主清單.csv", mapMainRows(getFilteredNotifications()));
-      });
-
-      dom.mainPageSize.addEventListener("change", (event) => {
-        state.main.pageSize = Number(event.target.value);
-        state.main.page = 1;
-        renderMainTable();
-      });
-
-      dom.messageCloseIcon.addEventListener("click", closeMessageModal);
-      dom.messageConfirmBtn.addEventListener("click", closeMessageModal);
-      dom.messageModal.addEventListener("click", (event) => {
-        if (event.target === dom.messageModal) {
-          closeMessageModal();
-        }
-      });
-
-      dom.closeModalBtn.addEventListener("click", closeRecipientModal);
-      dom.recipientModal.addEventListener("click", (event) => {
-        if (event.target === dom.recipientModal) {
-          closeRecipientModal();
-        }
-      });
-
-      dom.searchRecipientsBtn.addEventListener("click", () => {
-        state.recipient.page = 1;
-        syncRecipientFiltersFromDom();
-        renderRecipientTable();
-      });
-
-      dom.resetRecipientsBtn.addEventListener("click", () => {
-        state.recipient.filters = {
-          idNo: "",
-          name: "",
-          account: "",
-          status: "全部"
-        };
-        state.recipient.page = 1;
-        syncRecipientFiltersToDom();
-        renderRecipientTable();
-      });
-
-      dom.recipientPageSize.addEventListener("change", (event) => {
-        state.recipient.pageSize = Number(event.target.value);
-        state.recipient.page = 1;
-        renderRecipientTable();
-      });
-
-      dom.exportRecipientsBtn.addEventListener("click", () => {
-        if (!state.recipient.notification) {
-          return;
-        }
-        exportCsv("傳送名單明細.csv", mapRecipientRows(getFilteredRecipients()));
-      });
-    }
-
-    function renderMainTable() {
-      const filtered = getFilteredNotifications();
-      const totalPages = getTotalPages(filtered.length, state.main.pageSize);
-      state.main.page = Math.min(state.main.page, totalPages);
-      const pageRows = paginate(filtered, state.main.page, state.main.pageSize);
-
-      dom.queryTime.textContent = `查詢時間：${formatNow()}`;
-      dom.mainPagingInfo.innerHTML = `共有 <strong>${filtered.length}</strong> 筆資料`;
-
-      if (!pageRows.length) {
-        dom.mainTableBody.innerHTML = `
-          <tr>
-            <td colspan="10"><div class="empty">查無符合條件的通知紀錄。</div></td>
-          </tr>
-        `;
-      } else {
-        dom.mainTableBody.innerHTML = pageRows.map((item) => `
-          <tr>
-            <td>${item.serial}</td>
-            <td>${item.notifyTime}</td>
-            <td class="subject-cell"><button class="subject-link" data-subject-id="${item.pk}">${item.subject}</button></td>
-            <td class="content-cell">${item.content}</td>
-            <td>${item.channel}</td>
-            <td>${item.totalCount}</td>
-            <td>${item.failedCount}</td>
-            <td>${item.creator}</td>
-            <td>${renderStatusBadge(item.status)}</td>
-            <td><button class="mini-btn" data-notification-id="${item.pk}">查看</button></td>
-          </tr>
-        `).join("");
-      }
-
-      dom.mainTableBody.querySelectorAll("[data-notification-id]").forEach((button) => {
-        button.addEventListener("click", () => openRecipientModal(button.dataset.notificationId));
-      });
-      dom.mainTableBody.querySelectorAll("[data-subject-id]").forEach((button) => {
-        button.addEventListener("click", () => openMessageModal(button.dataset.subjectId));
-      });
-
-      renderPageNav(dom.mainPageNav, state.main.page, totalPages, (page) => {
-        state.main.page = page;
-        renderMainTable();
-      });
-    }
-
-    function renderRecipientTable() {
-      const filtered = getFilteredRecipients();
-      const totalPages = getTotalPages(filtered.length, state.recipient.pageSize);
-      state.recipient.page = Math.min(state.recipient.page, totalPages);
-      const pageRows = paginate(filtered, state.recipient.page, state.recipient.pageSize);
-      dom.recipientPagingInfo.innerHTML = `共有 <strong>${filtered.length}</strong> 筆資料`;
-
-      if (!pageRows.length) {
-        dom.recipientTableBody.innerHTML = `
-          <tr>
-            <td colspan="5"><div class="empty">查無符合條件的傳送名單資料。</div></td>
-          </tr>
-        `;
-      } else {
-        dom.recipientTableBody.innerHTML = pageRows.map((item) => `
-          <tr>
-            <td>${item.serial}</td>
-            <td>${item.idNo}</td>
-            <td>${item.name}</td>
-            <td>${item.account}</td>
-            <td>${renderStatusBadge(item.status)}</td>
-          </tr>
-        `).join("");
-      }
-
-      renderPageNav(dom.recipientPageNav, state.recipient.page, totalPages, (page) => {
-        state.recipient.page = page;
-        renderRecipientTable();
-      });
-    }
-
-    function renderPageNav(container, currentPage, totalPages, onChange) {
-      const pages = buildPageList(currentPage, totalPages);
-      container.innerHTML = "";
-
-      const prev = document.createElement("button");
-      prev.className = `pager-btn ${currentPage === 1 ? "disabled" : ""}`;
-      prev.textContent = "<";
-      prev.disabled = currentPage === 1;
-      prev.addEventListener("click", () => {
-        if (currentPage > 1) {
-          onChange(currentPage - 1);
-        }
-      });
-      container.appendChild(prev);
-
-      pages.forEach((page) => {
-        const el = document.createElement("button");
-        el.className = `pager-number ${page === currentPage ? "active" : ""}`;
-        el.textContent = page;
-        el.addEventListener("click", () => onChange(page));
-        container.appendChild(el);
-      });
-
-      const next = document.createElement("button");
-      next.className = `pager-btn ${currentPage === totalPages ? "disabled" : ""}`;
-      next.textContent = ">";
-      next.disabled = currentPage === totalPages;
-      next.addEventListener("click", () => {
-        if (currentPage < totalPages) {
-          onChange(currentPage + 1);
-        }
-      });
-      container.appendChild(next);
-    }
-
-    function buildPageList(currentPage, totalPages) {
-      if (totalPages <= 5) {
-        return Array.from({ length: totalPages }, (_, i) => i + 1);
-      }
-      if (currentPage <= 3) {
-        return [1, 2, 3, 4, 5];
-      }
-      if (currentPage >= totalPages - 2) {
-        return [totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-      }
-      return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
-    }
-
-    function openRecipientModal(notificationId) {
-      const notification = notifications.find((item) => String(item.pk) === String(notificationId));
-      if (!notification) {
-        return;
-      }
-      state.recipient.notification = notification;
-      state.recipient.page = 1;
-      state.recipient.filters = {
-        idNo: "",
-        name: "",
-        account: "",
-        status: "全部"
-      };
-      syncRecipientFiltersToDom();
-      dom.modalTitle.textContent = `傳送名單 | ${notification.subject}`;
-      dom.modalSubtitle.textContent = `編號 ${notification.serial} / 發送管道 ${notification.channel} / 發送狀態 ${notification.status}`;
-      dom.recipientModal.classList.add("show");
-      renderRecipientTable();
-    }
-
-    function openMessageModal(notificationId) {
-      const notification = notifications.find((item) => String(item.pk) === String(notificationId));
-      if (!notification) {
-        return;
-      }
-      dom.messageSubject.textContent = notification.subject;
-      dom.messageContent.textContent = notification.content;
-      dom.messageModal.classList.add("show");
-    }
-
-    function closeMessageModal() {
-      dom.messageModal.classList.remove("show");
-    }
-
-    function closeRecipientModal() {
-      dom.recipientModal.classList.remove("show");
-      state.recipient.notification = null;
-    }
-
-    function getFilteredNotifications() {
-      const filters = state.main.filters;
-      return notifications.filter((item) => {
-        const creatorSource = `${item.creator} ${item.source}`;
-        return (
-          (!filters.serial || String(item.serial).includes(filters.serial)) &&
-          (!filters.startDate || item.notifyDate >= filters.startDate) &&
-          (!filters.endDate || item.notifyDate <= filters.endDate) &&
-          includesText(item.subject, filters.subject) &&
-          includesText(item.content, filters.contentKeyword) &&
-          matchSelect(item.channel, filters.channel) &&
-          matchSelect(item.status, filters.status) &&
-          includesText(creatorSource, filters.creator)
-        );
-      });
-    }
-
-    function getFilteredRecipients() {
-      const notification = state.recipient.notification;
-      if (!notification) {
-        return [];
-      }
-      const filters = state.recipient.filters;
-      return notification.recipients.filter((item) => (
-        includesText(item.idNo, filters.idNo) &&
-        includesText(item.name, filters.name) &&
-        includesText(item.account, filters.account) &&
-        matchSelect(item.status, filters.status)
-      ));
-    }
-
-    function syncMainFiltersFromDom() {
-      state.main.filters = {
-        serial: dom.mainSerial.value.trim(),
-        startDate: dom.mainStartDate.value,
-        endDate: dom.mainEndDate.value,
-        subject: dom.mainSubject.value.trim(),
-        contentKeyword: dom.mainContentKeyword.value.trim(),
-        channel: dom.mainChannel.value,
-        status: dom.mainStatus.value,
-        creator: dom.mainCreator.value.trim()
-      };
-    }
-
-    function syncMainFiltersToDom() {
-      dom.mainSerial.value = state.main.filters.serial;
-      dom.mainStartDate.value = state.main.filters.startDate;
-      dom.mainEndDate.value = state.main.filters.endDate;
-      dom.mainSubject.value = state.main.filters.subject;
-      dom.mainContentKeyword.value = state.main.filters.contentKeyword;
-      dom.mainChannel.value = state.main.filters.channel;
-      dom.mainStatus.value = state.main.filters.status;
-      dom.mainCreator.value = state.main.filters.creator;
-    }
-
-    function syncRecipientFiltersFromDom() {
-      state.recipient.filters = {
-        idNo: dom.recipientIdNo.value.trim(),
-        name: dom.recipientName.value.trim(),
-        account: dom.recipientAccount.value.trim(),
-        status: dom.recipientStatus.value
-      };
-    }
-
-    function syncRecipientFiltersToDom() {
-      dom.recipientIdNo.value = state.recipient.filters.idNo;
-      dom.recipientName.value = state.recipient.filters.name;
-      dom.recipientAccount.value = state.recipient.filters.account;
-      dom.recipientStatus.value = state.recipient.filters.status;
-    }
-
-    function fillSelect(element, options) {
-      element.innerHTML = options.map((option) => `<option value="${option}">${option}</option>`).join("");
-    }
-
-    function matchSelect(value, filterValue) {
-      return filterValue === "全部" || value === filterValue;
-    }
-
-    function includesText(value, keyword) {
-      return !keyword || String(value).toLowerCase().includes(keyword.toLowerCase());
-    }
-
-    function paginate(rows, page, pageSize) {
-      const start = (page - 1) * pageSize;
-      return rows.slice(start, start + pageSize);
-    }
-
-    function getTotalPages(total, pageSize) {
-      return Math.max(1, Math.ceil(total / pageSize));
-    }
-
-    function renderStatusBadge(status) {
-      const classMap = {
-        "成功": "status-chip status-success",
-        "失敗": "status-chip status-danger"
-      };
-      return `<span class="${classMap[status] || "status-chip"}">${status}</span>`;
-    }
-
-    function mapMainRows(rows) {
-      return rows.map((item) => ({
-        編號: item.serial,
-        通知時間: item.notifyTime,
-        通知主旨: item.subject,
-        通知內文: item.content,
-        發送管道: item.channel,
-        發送總數: item.totalCount,
-        發送失敗數: item.failedCount,
-        建立者: item.creator,
-        來源: item.source,
-        發送狀態: item.status
-      }));
-    }
-
-    function mapRecipientRows(rows) {
-      return rows.map((item) => ({
-        序號: item.serial,
-        身分證: item.idNo,
-        姓名: item.name,
-        帳號: item.account,
-        發送狀態: item.status
-      }));
-    }
-
-    function exportCsv(filename, rows) {
-      if (!rows.length) {
-        alert("目前沒有可匯出的資料。");
-        return;
-      }
-      const headers = Object.keys(rows[0]);
-      const csv = [
-        headers.join(","),
-        ...rows.map((row) => headers.map((header) => escapeCsv(row[header])).join(","))
-      ].join("\n");
-      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function escapeCsv(value) {
-      return `"${String(value ?? "").replaceAll("\"", "\"\"")}"`;
-    }
-
-    function formatNow() {
-      const date = new Date();
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, "0");
-      const dd = String(date.getDate()).padStart(2, "0");
-      const hh = String(date.getHours()).padStart(2, "0");
-      const mi = String(date.getMinutes()).padStart(2, "0");
-      const ss = String(date.getSeconds()).padStart(2, "0");
-      return `${yyyy}/${mm}/${dd} ${hh}:${mi}:${ss}`;
-    }
-
-    function buildMockData() {
-      const channelPool = ["APP跑馬燈", "APP春聯", "APP通知", "Email", "LINE@", "LON"];
-      const creatorPool = ["王小明", "李雅婷", "客服中心", "系統管理員", "營運排程"];
-      const sourcePool = ["後台手動", "系統排程", "會員事件", "帳務批次"];
-      const subjects = [
-        "會員等級升等通知",
-        "信用卡扣款提醒",
-        "活動報名成功通知",
-        "系統維護公告",
-        "紅利點數到期提醒",
-        "帳號安全驗證通知",
-        "生日優惠券發送",
-        "出貨進度更新",
-        "繳費逾期提醒",
-        "春季活動開跑通知"
-      ];
-      const contentTemplates = [
-        "親愛的會員您好，系統已為您完成通知發送，請留意最新訊息與後續作業說明。",
-        "本次通知內容包含重要權益異動，建議登入會員中心查看完整細節與注意事項。",
-        "若您收到此通知，代表您的帳務或活動資格已有更新，請儘速確認避免影響使用權益。",
-        "系統將依據您的帳號狀態進行後續處理，如有疑問請洽客服中心協助查詢。"
-      ];
-
-      return Array.from({ length: 28 }, (_, index) => {
-        const pk = 10001 + index;
-        const channel = channelPool[index % channelPool.length];
-        const totalCount = 18 + (index % 7) * 9;
-        const failedCount = index % 4 === 0 ? 0 : 1 + (index % 5);
-        const status = failedCount > 0 ? "失敗" : "成功";
-        const month = String((index % 3) + 1).padStart(2, "0");
-        const day = String((index % 9) + 1).padStart(2, "0");
-        const hour = String(9 + (index % 8)).padStart(2, "0");
-        const minute = String((index * 7) % 60).padStart(2, "0");
-        const notifyDate = `2026-${month}-${day}`;
-        const notifyTime = `${notifyDate} ${hour}:${minute}:00`;
-        const subject = subjects[index % subjects.length];
-        const content = `${contentTemplates[index % contentTemplates.length]} 本批次編號為 BATCH-2026${month}${day}-${String(index + 1).padStart(3, "0")}。`;
-        const creator = creatorPool[index % creatorPool.length];
-        const source = sourcePool[index % sourcePool.length];
-        const batchNo = `BATCH-2026${month}${day}-${String(index + 1).padStart(3, "0")}`;
-        const serial = `NTC-2026${month}${day}-${String(index + 1).padStart(3, "0")}`;
-
-        return {
-          serial,
-          pk,
-          notifyDate,
-          notifyTime,
-          subject,
-          content,
-          channel,
-          totalCount,
-          failedCount,
-          creator,
-          source,
-          status,
-          batchNo,
-          recipients: buildRecipients(pk, totalCount, failedCount, status)
-        };
-      });
-    }
-
-    function buildRecipients(notificationPk, totalCount, failedCount, parentStatus) {
-      return Array.from({ length: totalCount }, (_, index) => {
-        const pk = `${notificationPk}${String(index + 1).padStart(3, "0")}`;
-        const status = parentStatus === "失敗" && index < failedCount ? "失敗" : "成功";
-
-        return {
-          serial: index + 1,
-          pk,
-          idNo: `${String.fromCharCode(65 + (index % 26))}12${String(notificationPk).slice(-2)}${String(index + 1).padStart(4, "0")}`,
-          name: `測試使用者${index + 1}`,
-          account: `user_${notificationPk}_${String(index + 1).padStart(2, "0")}`,
-          status
-        };
-      });
-    }
-  </script>
 </body>
 </html>
