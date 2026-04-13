@@ -742,6 +742,28 @@
       max-width: 220px;
     }
 
+    .creator-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      line-height: 1.25;
+      min-width: 5.5em;
+    }
+
+    .creator-cell__line {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .creator-cell__pk {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
     @media (max-width: 960px) {
       .layout {
         grid-template-columns: minmax(0, 1fr);
@@ -864,7 +886,7 @@
             </div>
             <div class="field filter-full">
               <label>建立者：</label>
-              <div class="control"><input type="text" id="mainCreator" placeholder="搜尋建立者"></div>
+              <div class="control"><input type="text" id="mainCreator" placeholder="搜尋建立者姓名或 PK 編號"></div>
             </div>
           </div>
 
@@ -1390,7 +1412,7 @@
           <td>${escHtml(item.channel)}</td>
           <td>${item.totalCount}</td>
           <td>${item.failedCount}</td>
-          <td>${escHtml(item.creator || "-")}</td>
+          <td>${formatCreatorTableHtml(item)}</td>
           <td>${renderStatusBadge(item.status)}</td>
           <td><button type="button" class="mini-btn" data-notification-id="${item.pk}">查看</button></td>
           <td>${escHtml(item.displayNo)}</td>
@@ -1635,7 +1657,7 @@
         return (
           matchSelect(item.channel, filters.channel) &&
           matchSelect(item.status, filters.status) &&
-          includesText(item.creator || "", filters.creator)
+          includesText(creatorSearchText(item), filters.creator)
         );
       });
     }
@@ -1700,6 +1722,37 @@
       return !keyword || String(value).toLowerCase().includes(keyword.toLowerCase());
     }
 
+    function creatorSearchText(item) {
+      const name = item.creatorName || "";
+      const pk = item.creatorPk || "";
+      return `${name} ${pk}`.trim();
+    }
+
+    function formatCreatorTableHtml(item) {
+      const name = item.creatorName || "";
+      const pk = item.creatorPk || "";
+      if (!name && !pk) {
+        return "-";
+      }
+      const parts = [];
+      if (name) {
+        parts.push(`<div class="creator-cell__line">${escHtml(name)}</div>`);
+      }
+      if (pk) {
+        parts.push(`<div class="creator-cell__line creator-cell__pk">${escHtml(pk)}</div>`);
+      }
+      return `<div class="creator-cell">${parts.join("")}</div>`;
+    }
+
+    function formatCreatorCsvValue(item) {
+      const name = item.creatorName || "";
+      const pk = item.creatorPk || "";
+      if (!name && !pk) {
+        return "-";
+      }
+      return pk ? `${name}\n${pk}` : name;
+    }
+
     function paginate(rows, page, pageSize) {
       const start = (page - 1) * pageSize;
       return rows.slice(start, start + pageSize);
@@ -1751,7 +1804,7 @@
           發送管道: item.channel,
           發送總數: item.totalCount,
           發送失敗數: item.failedCount,
-          建立者: item.creator || "-",
+          建立者: formatCreatorCsvValue(item),
           發送狀態: item.status,
           編號: item.displayNo
         };
@@ -1926,7 +1979,9 @@
           }
         }
 
-        const creator = index % 7 === 0 ? "" : creatorPool[index % creatorPool.length];
+        const hasCreator = index % 7 !== 0;
+        const creatorName = hasCreator ? creatorPool[index % creatorPool.length] : "";
+        const creatorPk = hasCreator ? `PK${String(pk - 10000).padStart(3, "0")}` : "";
         const source = sourcePool[index % sourcePool.length];
         const batchNo = `BATCH-2026${month}${day}-${String(index + 1).padStart(3, "0")}`;
         const displayNo = `NTC-2026${month}${day}-${String(index + 1).padStart(3, "0")}`;
@@ -1946,7 +2001,8 @@
           channel,
           totalCount,
           failedCount,
-          creator,
+          creatorName,
+          creatorPk,
           source,
           status,
           batchNo,
