@@ -602,6 +602,11 @@
       padding: 28px;
     }
 
+    .modal.help-modal {
+      width: min(640px, calc(100vw - 48px));
+      padding: 28px;
+    }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -701,6 +706,83 @@
       margin-bottom: 10px;
     }
 
+    .help-modal-body code {
+      font-size: 0.92em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #ececee;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    }
+
+    .help-channel-wrap {
+      display: inline-block;
+      max-width: 100%;
+    }
+
+    .help-channel-caption {
+      margin: 14px 0 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .help-channel-table {
+      display: inline-table;
+      width: auto;
+      min-width: 0;
+      max-width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      table-layout: fixed;
+    }
+
+    .help-channel-col-channel {
+      width: 8.5rem;
+    }
+
+    .help-channel-col-code {
+      width: 2.75rem;
+    }
+
+    .help-channel-table th,
+    .help-channel-table td {
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    .help-channel-table th:first-child,
+    .help-channel-table td:first-child {
+      white-space: nowrap;
+    }
+
+    .help-channel-table th:last-child,
+    .help-channel-table td:last-child {
+      white-space: nowrap;
+      text-align: center;
+      padding-left: 6px;
+      padding-right: 6px;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-weight: 600;
+    }
+
+    .help-channel-table tbody td:last-child {
+      color: var(--primary);
+    }
+
+    .help-channel-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .help-channel-table thead th {
+      background: var(--primary-soft);
+      font-weight: 600;
+    }
+
     .message-field {
       margin-bottom: 24px;
       font-size: 16px;
@@ -710,6 +792,17 @@
 
     .message-label {
       font-weight: 500;
+    }
+
+    .message-label-with-action {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .message-label-with-action .message-label {
+      margin: 0;
     }
 
     .message-value {
@@ -864,6 +957,10 @@
               <label>身分證：</label>
               <div class="control"><input type="text" id="mainIdNo" placeholder="搜尋身分證字號（比對傳送名單）"></div>
             </div>
+            <div class="field">
+              <label>編號：</label>
+              <div class="control"><input type="text" id="mainDisplayNo" maxlength="32" placeholder="編號關鍵字，部分相符"></div>
+            </div>
             <div class="field filter-full">
               <label>通知時間區間：</label>
               <div class="date-range">
@@ -1012,9 +1109,59 @@
         <ul>
           <li>請先設定查詢條件後按「查詢」，主清單預設不載入資料；查詢結果每頁 10 筆，可使用分頁切換最前頁、上一頁、頁碼、下一頁、最末頁。</li>
           <li>通知時間區間支援日期與時分。</li>
-          <li>發送狀態為是否打到ＡＰＩ，非用戶是否收到之依據。</li>
+          <li>發送狀態為是否成功將這批資訊發送給系統，無法判斷用戶是否收到。</li>
           <li>ＭＡＰ識別碼為ＭＡＰ系統對該批次之辨識。</li>
+          <li>編號格式為西元年月日+管道代碼+序號（如：2026PUH0114）。</li>
         </ul>
+        <div class="help-channel-wrap">
+        <p class="help-channel-caption">管道代碼如下：</p>
+        <table class="help-channel-table" role="grid" aria-label="發送管道與編號代碼對照">
+          <colgroup>
+            <col class="help-channel-col-channel" />
+            <col class="help-channel-col-code" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">發送管道</th>
+              <th scope="col">代碼</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>APP離線推播</td>
+              <td>PUH</td>
+            </tr>
+            <tr>
+              <td>APP春聯</td>
+              <td>CPL</td>
+            </tr>
+            <tr>
+              <td>APP彈窗</td>
+              <td>POP</td>
+            </tr>
+            <tr>
+              <td>APP跑馬燈</td>
+              <td>MAR</td>
+            </tr>
+            <tr>
+              <td>簡訊</td>
+              <td>SMS</td>
+            </tr>
+            <tr>
+              <td>LON</td>
+              <td>LON</td>
+            </tr>
+            <tr>
+              <td>line@</td>
+              <td>LINE</td>
+            </tr>
+            <tr>
+              <td>Email</td>
+              <td>MAIL</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
       </div>
     </div>
   </div>
@@ -1054,7 +1201,7 @@
       "簡訊",
       "LON",
       "line@",
-      "eMAIL"
+      "Email"
     ];
     const statuses = ["全部", "成功", "失敗"];
     const notifications = buildMockData();
@@ -1072,6 +1219,7 @@
           notifyStart: "",
           notifyEnd: "",
           titleKeyword: "",
+          displayNo: "",
           channel: "全部",
           status: "全部",
           creator: ""
@@ -1100,6 +1248,7 @@
       mainNotifyStart: document.getElementById("mainNotifyStart"),
       mainNotifyEnd: document.getElementById("mainNotifyEnd"),
       mainTitleKeyword: document.getElementById("mainTitleKeyword"),
+      mainDisplayNo: document.getElementById("mainDisplayNo"),
       mainChannel: document.getElementById("mainChannel"),
       mainStatus: document.getElementById("mainStatus"),
       mainCreator: document.getElementById("mainCreator"),
@@ -1131,6 +1280,9 @@
       guild3ReminderMsg: document.getElementById("guild3ReminderMsg"),
       guild3ReminderConfirm: document.getElementById("guild3ReminderConfirm")
     };
+
+    /** 通知內容彈窗：Email 時供「預覽」另開視窗使用 */
+    let messageModalEmailPreview = null;
 
     init();
 
@@ -1169,6 +1321,7 @@
           notifyStart: "",
           notifyEnd: "",
           titleKeyword: "",
+          displayNo: "",
           channel: "全部",
           status: "全部",
           creator: ""
@@ -1206,6 +1359,15 @@
         if (event.target === dom.messageModal) {
           closeMessageModal();
         }
+      });
+
+      dom.messageModalFields.addEventListener("click", (event) => {
+        const previewBtn = event.target.closest("[data-email-preview]");
+        if (!previewBtn) {
+          return;
+        }
+        event.preventDefault();
+        openEmailHtmlPreviewWindow();
       });
 
       dom.closeModalBtn.addEventListener("click", closeRecipientModal);
@@ -1252,18 +1414,54 @@
       });
     }
 
+    function smsBodyTrimmed(item) {
+      return String(item.content || "").trim();
+    }
+
+    /** 簡訊「通知標題」：取彈窗內文（content）前 10 字；無內文則「-」。 */
+    function previewSmsTitleFromBody(item) {
+      const c = smsBodyTrimmed(item);
+      if (!c) {
+        return "-";
+      }
+      return c.slice(0, 10);
+    }
+
+    /** 主表「通知標題」欄 tooltip：簡訊為完整內文；其餘為完整主旨；無則「-」。 */
     function listNotifyTitleText(item) {
-      const t = String(item.notifyTitle || "").trim();
-      return t || String(item.subject || "");
+      if (item.channel === "簡訊") {
+        return smsBodyTrimmed(item) || "-";
+      }
+      const s = String(item.subject || "").trim();
+      return s || "-";
     }
 
+    /** 通知內容彈窗頂部：簡訊為內文前 10 字；其餘為主旨全文（與主表 tooltip 一致）。 */
     function messageModalHeadTitle(item) {
-      const t = String(item.notifyTitle || "").trim();
-      return t || "（無通知標題）";
+      if (item.channel === "簡訊") {
+        return previewSmsTitleFromBody(item);
+      }
+      return listNotifyTitleText(item);
     }
 
+    /** 主表「通知標題」欄顯示：簡訊為內文前 10 字；其餘為主旨前 10 字；無則「-」。 */
     function previewNotifyTitle(item) {
-      return listNotifyTitleText(item).slice(0, 15);
+      if (item.channel === "簡訊") {
+        return previewSmsTitleFromBody(item);
+      }
+      const s = String(item.subject || "").trim();
+      if (!s) {
+        return "-";
+      }
+      return s.slice(0, 10);
+    }
+
+    function isChannelWithoutSendStats(channel) {
+      return channel === "APP彈窗" || channel === "APP春聯" || channel === "APP跑馬燈";
+    }
+
+    function mainTableStatDash(channel) {
+      return isChannelWithoutSendStats(channel) ? "-" : null;
     }
 
     function matchesTitleKeyword(item, keyword) {
@@ -1287,6 +1485,40 @@
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll("\"", "&quot;");
+    }
+
+    function openEmailHtmlPreviewWindow() {
+      if (!messageModalEmailPreview) {
+        return;
+      }
+      const html = messageModalEmailPreview.html ?? "";
+      const subject = messageModalEmailPreview.subject ?? "";
+      /* 不可在第三參數使用 noopener：多數 Chromium 會回傳 null，無法 document.write */
+      const win = window.open("", "_blank");
+      if (!win) {
+        showGuild3Reminder("提醒", "請允許開啟彈出視窗後再試。");
+        return;
+      }
+      const doc = win.document;
+      const titleSafe = escHtml(String(subject || "Email 預覽").slice(0, 200));
+      const bodyHtml =
+        String(html).trim() === ""
+          ? '<p style="margin:16px;font:15px/1.6 system-ui,sans-serif;color:#666">（無可預覽內文）</p>'
+          : String(html);
+      doc.open();
+      doc.write("<!DOCTYPE html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\">");
+      doc.write('<meta name="viewport" content="width=device-width,initial-scale=1">');
+      doc.write("<title>");
+      doc.write(titleSafe);
+      doc.write("</title></head><body>");
+      doc.write(bodyHtml);
+      doc.write("</body></html>");
+      doc.close();
+      try {
+        win.opener = null;
+      } catch {
+        /* 忽略：部分環境禁止設定 */
+      }
     }
 
     function buildMessageModalHtml(n) {
@@ -1318,6 +1550,19 @@
         );
       }
 
+      function emailBodyRow(item) {
+        const v = item.content === undefined || item.content === null ? "" : String(item.content);
+        rows.push(
+          `<div class="message-field">` +
+            `<div class="message-label-with-action">` +
+            `<span class="message-label">內文：</span>` +
+            `<button type="button" class="mini-btn" data-email-preview aria-label="於新視窗預覽 Email HTML 內文">預覽</button>` +
+            `</div>` +
+            `<span class="message-value">${escHtml(v)}</span>` +
+            `</div>`
+        );
+      }
+
       switch (ch) {
         case "APP離線推播":
           textRow("主旨：", n.subject);
@@ -1344,9 +1589,11 @@
           textRow("到達網址：", n.marqueeTargetUrl);
           break;
         case "簡訊":
-        case "eMAIL":
-          textRow("主旨：", n.subject);
           textRow("內文：", n.content);
+          break;
+        case "Email":
+          textRow("主旨：", n.subject);
+          emailBodyRow(n);
           break;
         case "LON":
           textRow("主旨：", n.lonSubject || n.subject);
@@ -1410,10 +1657,10 @@
             <button type="button" class="subject-link title-preview-text" data-message-id="${item.pk}" title="${escHtml(listNotifyTitleText(item))}">${escHtml(previewNotifyTitle(item))}</button>
           </td>
           <td>${escHtml(item.channel)}</td>
-          <td>${item.totalCount}</td>
-          <td>${item.failedCount}</td>
+          <td>${mainTableStatDash(item.channel) ?? item.totalCount}</td>
+          <td>${mainTableStatDash(item.channel) ?? item.failedCount}</td>
           <td>${formatCreatorTableHtml(item)}</td>
-          <td>${renderStatusBadge(item.status)}</td>
+          <td>${mainTableStatDash(item.channel) ?? renderStatusBadge(item.status)}</td>
           <td><button type="button" class="mini-btn" data-notification-id="${item.pk}">查看</button></td>
           <td>${escHtml(item.displayNo)}</td>
         </tr>
@@ -1607,8 +1854,14 @@
         name: ""
       };
       syncRecipientFiltersToDom();
-      dom.modalTitle.textContent = `傳送名單 | ${notification.notifyTitle || notification.subject}`;
-      dom.modalSubtitle.textContent = `MAP識別碼 ${notification.mapId} / 發送管道 ${notification.channel} / 發送狀態 ${notification.status}`;
+      const recvTitlePart = notification.channel === "簡訊"
+        ? previewSmsTitleFromBody(notification)
+        : listNotifyTitleText(notification);
+      dom.modalTitle.textContent = `傳送名單 | ${recvTitlePart}`;
+      const statPart = isChannelWithoutSendStats(notification.channel)
+        ? "-"
+        : notification.status;
+      dom.modalSubtitle.textContent = `MAP識別碼 ${notification.mapId} / 發送管道 ${notification.channel} / 發送狀態 ${statPart}`;
       dom.recipientModal.classList.add("show");
       renderRecipientTable();
     }
@@ -1618,6 +1871,10 @@
       if (!notification) {
         return;
       }
+      messageModalEmailPreview =
+        notification.channel === "Email"
+          ? { html: notification.content ?? "", subject: notification.subject ?? "" }
+          : null;
       dom.messageModalTitle.textContent = messageModalHeadTitle(notification);
       dom.messageModalFields.innerHTML = buildMessageModalHtml(notification);
       dom.messageModal.classList.add("show");
@@ -1626,6 +1883,7 @@
     function closeMessageModal() {
       dom.messageModal.classList.remove("show");
       dom.messageModalFields.innerHTML = "";
+      messageModalEmailPreview = null;
     }
 
     function closeRecipientModal() {
@@ -1652,6 +1910,10 @@
           return false;
         }
         if (!matchesTitleKeyword(item, filters.titleKeyword)) {
+          return false;
+        }
+        const dispQ = filters.displayNo.trim();
+        if (dispQ && !includesText(item.displayNo || "", dispQ)) {
           return false;
         }
         return (
@@ -1681,6 +1943,7 @@
         notifyStart: dom.mainNotifyStart.value,
         notifyEnd: dom.mainNotifyEnd.value,
         titleKeyword: dom.mainTitleKeyword.value.trim(),
+        displayNo: dom.mainDisplayNo.value.trim(),
         channel: dom.mainChannel.value,
         status: dom.mainStatus.value,
         creator: dom.mainCreator.value.trim()
@@ -1693,6 +1956,7 @@
       dom.mainNotifyStart.value = state.main.filters.notifyStart;
       dom.mainNotifyEnd.value = state.main.filters.notifyEnd;
       dom.mainTitleKeyword.value = state.main.filters.titleKeyword;
+      dom.mainDisplayNo.value = state.main.filters.displayNo;
       dom.mainChannel.value = state.main.filters.channel;
       dom.mainStatus.value = state.main.filters.status;
       dom.mainCreator.value = state.main.filters.creator;
@@ -1796,10 +2060,11 @@
     function mapMainRows(rows) {
       return rows.map((item) => {
         const imageUrl = item.appPopupImageUrl || item.lineImageUrl || "";
+        const dash = mainTableStatDash(item.channel);
         return {
           MAP識別碼: item.mapId,
           通知時間: item.notifyTime,
-          通知標題: item.notifyTitle || "",
+          通知標題: previewNotifyTitle(item),
           通知主旨: item.subject,
           通知內文: item.content,
           到達網頁: csvField(item.landingUrl),
@@ -1814,10 +2079,10 @@
           LON按鈕文字: csvField(item.lonButtonText),
           JSON: csvField(item.lineJson),
           發送管道: item.channel,
-          發送總數: item.totalCount,
-          發送失敗數: item.failedCount,
+          發送總數: dash ?? item.totalCount,
+          發送失敗數: dash ?? item.failedCount,
           建立者: formatCreatorCsvValue(item),
-          發送狀態: item.status,
+          發送狀態: dash ?? item.status,
           編號: item.displayNo
         };
       });
@@ -1875,6 +2140,37 @@
       return s;
     }
 
+    /** 編號用管道代碼（與畫面上中文管道名對應）。 */
+    function channelToDisplayCode(channel) {
+      switch (channel) {
+        case "APP離線推播":
+          return "PUH";
+        case "APP春聯":
+          return "CPL";
+        case "APP彈窗":
+          return "POP";
+        case "APP跑馬燈":
+          return "MAR";
+        case "簡訊":
+          return "SMS";
+        case "LON":
+          return "LON";
+        case "line@":
+          return "LINE";
+        case "Email":
+          return "MAIL";
+        default:
+          return "OTH";
+      }
+    }
+
+    /** 顯示編號：YYYYMMDD＋管道代碼＋0000（無分隔符；四位流水，原型以索引示意）。 */
+    function buildDisplayNo(notifyDateYyyyMmDd, channel, sequence) {
+      const ymd = String(notifyDateYyyyMmDd || "").replaceAll("-", "");
+      const code = channelToDisplayCode(channel);
+      return `${ymd}${code}${String(sequence).padStart(4, "0")}`;
+    }
+
     function buildMockData() {
       const channelPool = [
         "APP離線推播",
@@ -1884,7 +2180,7 @@
         "簡訊",
         "LON",
         "line@",
-        "eMAIL"
+        "Email"
       ];
       const creatorPool = ["王小明", "李雅婷", "客服中心", "系統管理員", "營運排程"];
       const sourcePool = ["後台手動", "系統排程", "會員事件", "帳務批次"];
@@ -1920,6 +2216,22 @@
         "系統將依據您的帳號狀態進行後續處理，如有疑問請洽客服中心協助查詢。"
       ];
 
+      const pocketSurveyEmailHtml = `<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;Arial Unicode MS&quot;">【2 分鐘填問卷就抽「牛牛造型杯墊」，口袋證券邀請您參加存股大調查】</span></span></strong></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">最好的投資時機永遠是從「現在」開始，讓時間複利的魔法，陪你的錢包穩穩長大！✨</span></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">在這條存股路上，我們希望能聽聽您的心聲，陪您走得更穩、更遠。<strong>現在只要點擊下方連結，花 2 分鐘完成「存股大調查」問卷</strong> ，就有機會把萌到爆表的「口袋牛牛造型杯墊」抽回家！ 限量 50 名，讓超萌牛牛療癒您的桌面日常吧！</span></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;新細明體&quot;,serif">👉 立即填寫問卷： </span></span></strong><span style="font-family:&quot;新細明體&quot;,serif"><a href="https://www.pocket.tw/piggybank/?page=6"><strong><span style="font-size:12.0pt"><span style="color:#1155cc">https://www.pocket.tw/piggybank/?page=6</span></span></strong></a></span><strong> </strong></span></span></p>
+<ul>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">活動期間：即日起至 2026/04/17 止。</span></span></span></li>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">活動對象：僅限收到信件之指定存股用戶參與，每人限填乙次。</span></span></span></li>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">活動方式：完整填寫問卷並成功送出，即可獲得抽獎機會。</span></span></span></li>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">活動好禮：口袋牛牛造型杯墊（限量 50 名）。</span></span></span></li>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">公告與領獎：中獎名單與寄送方式將於 2026 年 5 月 8 日前公告於官網。</span></span></span></li>
+</ul>
+<p style="margin-left:0cm; margin-right:0cm">&nbsp;</p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;Arial Unicode MS&quot;">讓我們一起運用複利的魔法，打造更好的投資體驗！</span></span></strong></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;Arial Unicode MS&quot;">口袋證券團隊 敬上</span></span></strong></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;新細明體&quot;,serif"><img src="圖片地址 " alt="" style="height:339px; width:601px" /></span></span></strong></span></span></p>`;
+
       return Array.from({ length: 28 }, (_, index) => {
         const pk = 10001 + index;
         const channel = channelPool[index % channelPool.length];
@@ -1936,7 +2248,7 @@
         const mapId = buildMapId(index);
         let notifyTitle = notifyTitles[i];
         let subject = subjects[i];
-        let content = `${contentTemplates[index % contentTemplates.length]} 本批次編號為 BATCH-2026${month}${day}-${String(index + 1).padStart(3, "0")}。`;
+        let content = contentTemplates[index % contentTemplates.length];
 
         let landingUrl = "";
         let internalName = "";
@@ -1989,6 +2301,10 @@
           } else {
             lineTextBody = content;
           }
+        } else if (channel === "Email") {
+          subject = "【2 分鐘填問卷就抽「牛牛造型杯墊」，口袋證券邀請您參加存股大調查】";
+          notifyTitle = subject;
+          content = pocketSurveyEmailHtml;
         }
 
         const hasCreator = index % 7 !== 0;
@@ -1996,10 +2312,15 @@
         const creatorPk = hasCreator ? `PK${String(pk - 10000).padStart(3, "0")}` : "";
         const source = sourcePool[index % sourcePool.length];
         const batchNo = `BATCH-2026${month}${day}-${String(index + 1).padStart(3, "0")}`;
-        const displayNo = `NTC-2026${month}${day}-${String(index + 1).padStart(3, "0")}`;
+        const displayNo = buildDisplayNo(notifyDate, channel, index + 1);
         const coupletStartDT = channel === "APP春聯" ? `${notifyDate}T${hour}:${minute}:00` : "";
         const endDay = String(Math.min(Number(day) + 5, 28)).padStart(2, "0");
         const coupletEndDT = channel === "APP春聯" ? `2026-${month}-${endDay}T23:59:00` : "";
+
+        if (channel === "簡訊") {
+          notifyTitle = "";
+          subject = "";
+        }
 
         return {
           mapId,
