@@ -957,10 +957,6 @@
               <label>身分證：</label>
               <div class="control"><input type="text" id="mainIdNo" placeholder="搜尋身分證字號（比對傳送名單）"></div>
             </div>
-            <div class="field">
-              <label>編號：</label>
-              <div class="control"><input type="text" id="mainDisplayNo" maxlength="32" placeholder="編號關鍵字，部分相符"></div>
-            </div>
             <div class="field filter-full">
               <label>通知時間區間：</label>
               <div class="date-range">
@@ -1219,7 +1215,6 @@
           notifyStart: "",
           notifyEnd: "",
           titleKeyword: "",
-          displayNo: "",
           channel: "全部",
           status: "全部",
           creator: ""
@@ -1248,7 +1243,6 @@
       mainNotifyStart: document.getElementById("mainNotifyStart"),
       mainNotifyEnd: document.getElementById("mainNotifyEnd"),
       mainTitleKeyword: document.getElementById("mainTitleKeyword"),
-      mainDisplayNo: document.getElementById("mainDisplayNo"),
       mainChannel: document.getElementById("mainChannel"),
       mainStatus: document.getElementById("mainStatus"),
       mainCreator: document.getElementById("mainCreator"),
@@ -1321,7 +1315,6 @@
           notifyStart: "",
           notifyEnd: "",
           titleKeyword: "",
-          displayNo: "",
           channel: "全部",
           status: "全部",
           creator: ""
@@ -1912,10 +1905,6 @@
         if (!matchesTitleKeyword(item, filters.titleKeyword)) {
           return false;
         }
-        const dispQ = filters.displayNo.trim();
-        if (dispQ && !includesText(item.displayNo || "", dispQ)) {
-          return false;
-        }
         return (
           matchSelect(item.channel, filters.channel) &&
           matchSelect(item.status, filters.status) &&
@@ -1943,7 +1932,6 @@
         notifyStart: dom.mainNotifyStart.value,
         notifyEnd: dom.mainNotifyEnd.value,
         titleKeyword: dom.mainTitleKeyword.value.trim(),
-        displayNo: dom.mainDisplayNo.value.trim(),
         channel: dom.mainChannel.value,
         status: dom.mainStatus.value,
         creator: dom.mainCreator.value.trim()
@@ -1956,7 +1944,6 @@
       dom.mainNotifyStart.value = state.main.filters.notifyStart;
       dom.mainNotifyEnd.value = state.main.filters.notifyEnd;
       dom.mainTitleKeyword.value = state.main.filters.titleKeyword;
-      dom.mainDisplayNo.value = state.main.filters.displayNo;
       dom.mainChannel.value = state.main.filters.channel;
       dom.mainStatus.value = state.main.filters.status;
       dom.mainCreator.value = state.main.filters.creator;
