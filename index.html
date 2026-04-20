@@ -999,7 +999,8 @@
               <thead>
                 <tr>
                   <th>MAP識別碼</th>
-                  <th>通知時間</th>
+                  <th>通知開始時間</th>
+                  <th>通知結束時間</th>
                   <th>通知標題</th>
                   <th>發送管道</th>
                   <th>發送總數</th>
@@ -1570,6 +1571,7 @@
           break;
         case "APP彈窗":
           textRow("主旨：", n.subject);
+          textRow("到達網址：", n.appPopupTargetUrl);
           if (n.appPopupImageUrl) {
             imageRow("圖片：", n.appPopupImageUrl, "APP 彈窗附圖");
           } else {
@@ -1641,11 +1643,46 @@
       return true;
     }
 
+    /** 將 YYYY-MM-DDTHH:mm:ss 轉為與 notifyTime 相同風格之 YYYY-MM-DD HH:mm:ss */
+    function formatNotifyWindowDisplay(dt) {
+      if (!dt || String(dt).trim() === "") {
+        return "";
+      }
+      return String(dt).replace("T", " ").slice(0, 19);
+    }
+
+    function mainTableNotifyStartDisplay(item) {
+      if (item.channel === "APP春聯" && item.coupletStartDT) {
+        return formatNotifyWindowDisplay(item.coupletStartDT);
+      }
+      if (
+        (item.channel === "APP彈窗" || item.channel === "APP跑馬燈") &&
+        item.notifyWindowStart
+      ) {
+        return formatNotifyWindowDisplay(item.notifyWindowStart);
+      }
+      return item.notifyTime || "";
+    }
+
+    function mainTableNotifyEndDisplay(item) {
+      if (item.channel === "APP春聯" && item.coupletEndDT) {
+        return formatNotifyWindowDisplay(item.coupletEndDT);
+      }
+      if (
+        (item.channel === "APP彈窗" || item.channel === "APP跑馬燈") &&
+        item.notifyWindowEnd
+      ) {
+        return formatNotifyWindowDisplay(item.notifyWindowEnd);
+      }
+      return "-";
+    }
+
     function renderMainTableRows(pageRows) {
       dom.mainTableBody.innerHTML = pageRows.map((item) => `
         <tr>
           <td>${escHtml(item.mapId)}</td>
-          <td>${escHtml(item.notifyTime)}</td>
+          <td>${escHtml(mainTableNotifyStartDisplay(item))}</td>
+          <td>${escHtml(mainTableNotifyEndDisplay(item))}</td>
           <td class="title-preview-cell">
             <button type="button" class="subject-link title-preview-text" data-message-id="${item.pk}" title="${escHtml(listNotifyTitleText(item))}">${escHtml(previewNotifyTitle(item))}</button>
           </td>
@@ -1673,7 +1710,7 @@
         dom.mainPagingInfo.innerHTML = `共有 <strong>0</strong> 筆資料`;
         dom.mainTableBody.innerHTML = `
           <tr>
-            <td colspan="10"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
+            <td colspan="11"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
           </tr>
         `;
         dom.mainPageNav.innerHTML = "";
@@ -1694,7 +1731,7 @@
       if (total === 0) {
         dom.mainTableBody.innerHTML = `
           <tr>
-            <td colspan="10"><div class="empty">查無符合條件的通知紀錄。</div></td>
+            <td colspan="11"><div class="empty">查無符合條件的通知紀錄。</div></td>
           </tr>
         `;
         dom.mainPageNav.innerHTML = "";
@@ -2050,7 +2087,8 @@
         const dash = mainTableStatDash(item.channel);
         return {
           MAP識別碼: item.mapId,
-          通知時間: item.notifyTime,
+          通知開始時間: mainTableNotifyStartDisplay(item),
+          通知結束時間: mainTableNotifyEndDisplay(item),
           通知標題: previewNotifyTitle(item),
           通知主旨: item.subject,
           通知內文: item.content,
@@ -2241,6 +2279,7 @@
         let internalName = "";
         let tickerContent = "";
         let marqueeTargetUrl = "";
+        let appPopupTargetUrl = "";
         let appPopupImageUrl = "";
         let lonSubject = "";
         let lonDescription = "";
@@ -2252,17 +2291,26 @@
         let lineTextBody = "";
         let lineJson = "";
         let lineImageUrl = "";
+        let notifyWindowStart = "";
+        let notifyWindowEnd = "";
 
         if (channel === "APP離線推播" || channel === "APP春聯") {
           landingUrl = `https://www.example.com/app/landing?batch=${pk}`;
         } else if (channel === "APP彈窗") {
+          appPopupTargetUrl = `https://www.example.com/popup/${mapId}`;
           if (index % 3 === 0) {
             appPopupImageUrl = `https://picsum.photos/seed/popup${pk}/480/320`;
           }
+          notifyWindowStart = `${notifyDate}T${hour}:${minute}:00`;
+          const popEndDay = String(Math.min(Number(day) + 2, 28)).padStart(2, "0");
+          notifyWindowEnd = `2026-${month}-${popEndDay}T23:59:00`;
         } else if (channel === "APP跑馬燈") {
           internalName = `跑馬燈_${mapId}_${notifyTitles[i].slice(0, 4)}`;
           tickerContent = `${subject}　｜　詳情請於 App 內點選連結（示意）`;
           marqueeTargetUrl = `https://www.example.com/m/${mapId}`;
+          notifyWindowStart = `${notifyDate}T${hour}:${minute}:00`;
+          const marEndDay = String(Math.min(Number(day) + 1, 28)).padStart(2, "0");
+          notifyWindowEnd = `2026-${month}-${marEndDay}T23:59:59`;
         } else if (channel === "LON") {
           const lonUnified = "LON 推播統一訊息：重要公告請留意帳戶狀態與最新權益說明。";
           notifyTitle = lonUnified;
@@ -2332,6 +2380,7 @@
           internalName,
           tickerContent,
           marqueeTargetUrl,
+          appPopupTargetUrl,
           appPopupImageUrl,
           lonSubject,
           lonDescription,
@@ -2343,6 +2392,8 @@
           lineTextBody,
           lineJson,
           lineImageUrl,
+          notifyWindowStart,
+          notifyWindowEnd,
           recipients: buildRecipients(pk, totalCount, failedCount, status)
         };
       });
