@@ -955,7 +955,7 @@
             </div>
             <div class="field">
               <label>身分證：</label>
-              <div class="control"><input type="text" id="mainIdNo" placeholder="搜尋身分證字號（比對傳送名單）"></div>
+              <div class="control"><input type="text" id="mainIdNo" placeholder="搜尋身分證字號（比對傳送對象）"></div>
             </div>
             <div class="field filter-full">
               <label>通知時間區間：</label>
@@ -1007,7 +1007,7 @@
                   <th>發送失敗數</th>
                   <th>建立者</th>
                   <th>發送狀態</th>
-                  <th>傳送名單</th>
+                  <th>傳送對象</th>
                   <th>編號</th>
                 </tr>
               </thead>
@@ -1028,11 +1028,11 @@
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2 class="modal-title" id="modalTitle">傳送名單</h2>
+          <h2 class="modal-title" id="modalTitle">傳送對象</h2>
           <p class="modal-subtitle" id="modalSubtitle"></p>
         </div>
         <div class="actions">
-          <button class="btn btn-secondary" id="exportRecipientsBtn">匯出名單</button>
+          <button class="btn btn-secondary" id="exportRecipientsBtn">匯出對象</button>
           <button class="btn btn-primary" id="closeModalBtn">關閉</button>
         </div>
       </div>
@@ -1067,6 +1067,7 @@
                 <th>身分證</th>
                 <th>姓名</th>
                 <th>帳號</th>
+                <th>發送狀態</th>
               </tr>
             </thead>
             <tbody id="recipientTableBody"></tbody>
@@ -1074,7 +1075,7 @@
         </div>
 
         <div class="pagination recipient-pagination">
-          <div class="page-nav" id="recipientPageNav" aria-label="傳送名單分頁"></div>
+          <div class="page-nav" id="recipientPageNav" aria-label="傳送對象分頁"></div>
         </div>
       </div>
     </div>
@@ -1394,10 +1395,10 @@
           return;
         }
         if (!state.recipient.hasSearched) {
-          showGuild3Reminder("提醒", "請先於傳送名單輸入查詢條件並執行查詢。");
+          showGuild3Reminder("提醒", "請先於傳送對象輸入查詢條件並執行查詢。");
           return;
         }
-        exportCsv("傳送名單明細.csv", mapRecipientRows(getFilteredRecipients()));
+        exportCsv("傳送對象明細.csv", mapRecipientRows(getFilteredRecipients()));
       });
 
       dom.guild3ReminderConfirm.addEventListener("click", closeGuild3Reminder);
@@ -1456,6 +1457,14 @@
 
     function mainTableStatDash(channel) {
       return isChannelWithoutSendStats(channel) ? "-" : null;
+    }
+
+    /** 傳送對象表「發送狀態」：與主表相同，特定管道不顯示個別發送狀態。 */
+    function recipientTableStatusCell(channel, status) {
+      if (isChannelWithoutSendStats(channel)) {
+        return "-";
+      }
+      return renderStatusBadge(status);
     }
 
     function matchesTitleKeyword(item, keyword) {
@@ -1755,7 +1764,7 @@
         dom.recipientPagingInfo.innerHTML = `共有 <strong>0</strong> 筆資料`;
         dom.recipientTableBody.innerHTML = `
           <tr>
-            <td colspan="4"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
+            <td colspan="5"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
           </tr>
         `;
         dom.recipientPageNav.innerHTML = "";
@@ -1771,16 +1780,18 @@
       if (!pageRows.length) {
         dom.recipientTableBody.innerHTML = `
           <tr>
-            <td colspan="4"><div class="empty">查無符合條件的傳送名單資料。</div></td>
+            <td colspan="5"><div class="empty">查無符合條件的傳送對象資料。</div></td>
           </tr>
         `;
       } else {
+        const ch = state.recipient.notification.channel;
         dom.recipientTableBody.innerHTML = pageRows.map((item) => `
           <tr>
             <td>${item.serial}</td>
             <td>${item.idNo}</td>
             <td>${item.name}</td>
             <td>${item.account}</td>
+            <td>${recipientTableStatusCell(ch, item.status)}</td>
           </tr>
         `).join("");
       }
@@ -1887,7 +1898,7 @@
       const recvTitlePart = notification.channel === "簡訊"
         ? previewSmsTitleFromBody(notification)
         : listNotifyTitleText(notification);
-      dom.modalTitle.textContent = `傳送名單 | ${recvTitlePart}`;
+      dom.modalTitle.textContent = `傳送對象 | ${recvTitlePart}`;
       const statPart = isChannelWithoutSendStats(notification.channel)
         ? "-"
         : notification.status;
@@ -2114,11 +2125,13 @@
     }
 
     function mapRecipientRows(rows) {
+      const channel = state.recipient.notification ? state.recipient.notification.channel : "";
       return rows.map((item) => ({
         序號: item.serial,
         身分證: item.idNo,
         姓名: item.name,
-        帳號: item.account
+        帳號: item.account,
+        發送狀態: isChannelWithoutSendStats(channel) ? "-" : csvField(item.status)
       }));
     }
 
