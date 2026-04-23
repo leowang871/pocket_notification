@@ -830,6 +830,26 @@
       padding-top: 8px;
     }
 
+    .message-email-iframe-wrap {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .message-email-iframe {
+      width: 100%;
+      min-height: 360px;
+      height: min(58vh, 520px);
+      border: 0;
+      display: block;
+    }
+
+    .message-field--email-preview .message-email-iframe-wrap {
+      margin-top: 10px;
+    }
+
     .title-preview-cell {
       text-align: left;
       max-width: 220px;
@@ -1066,7 +1086,7 @@
                 <th>序號</th>
                 <th>身分證</th>
                 <th>姓名</th>
-                <th>帳號</th>
+                <th>證券帳號</th>
                 <th>發送狀態</th>
               </tr>
             </thead>
@@ -1107,9 +1127,8 @@
         <ul>
           <li>請先設定查詢條件後按「查詢」，主清單預設不載入資料；查詢結果每頁 10 筆，可使用分頁切換最前頁、上一頁、頁碼、下一頁、最末頁。</li>
           <li>通知時間區間支援日期與時分。</li>
-          <li>發送狀態為是否成功將這批資訊發送給系統，無法判斷用戶是否收到。</li>
+          <li>發送狀態為訊息中心發送給外部廠商的結果，無法判斷用戶是否收到。</li>
           <li>ＭＡＰ識別碼為ＭＡＰ系統對該批次之辨識。</li>
-          <li>編號格式為西元年月日+管道代碼+序號（如：2026PUH0114）。</li>
         </ul>
         <div class="help-channel-wrap">
         <p class="help-channel-caption">管道代碼如下：</p>
@@ -1277,8 +1296,6 @@
       guild3ReminderConfirm: document.getElementById("guild3ReminderConfirm")
     };
 
-    /** 通知內容彈窗：Email 時供「預覽」另開視窗使用 */
-    let messageModalEmailPreview = null;
 
     init();
 
@@ -1356,15 +1373,6 @@
         }
       });
 
-      dom.messageModalFields.addEventListener("click", (event) => {
-        const previewBtn = event.target.closest("[data-email-preview]");
-        if (!previewBtn) {
-          return;
-        }
-        event.preventDefault();
-        openEmailHtmlPreviewWindow();
-      });
-
       dom.closeModalBtn.addEventListener("click", closeRecipientModal);
       dom.recipientModal.addEventListener("click", (event) => {
         if (event.target === dom.recipientModal) {
@@ -1431,7 +1439,7 @@
       return s || "-";
     }
 
-    /** 通知內容彈窗頂部：簡訊為內文前 10 字；其餘為主旨全文（與主表 tooltip 一致）。 */
+    /** 通知內容彈窗頂部：簡訊為內文前 10 字；其餘（含 Email）為主旨／內文全文（與主表 tooltip 一致）。 */
     function messageModalHeadTitle(item) {
       if (item.channel === "簡訊") {
         return previewSmsTitleFromBody(item);
@@ -1490,38 +1498,25 @@
         .replaceAll("\"", "&quot;");
     }
 
-    function openEmailHtmlPreviewWindow() {
-      if (!messageModalEmailPreview) {
-        return;
-      }
-      const html = messageModalEmailPreview.html ?? "";
-      const subject = messageModalEmailPreview.subject ?? "";
-      /* 不可在第三參數使用 noopener：多數 Chromium 會回傳 null，無法 document.write */
-      const win = window.open("", "_blank");
-      if (!win) {
-        showGuild3Reminder("提醒", "請允許開啟彈出視窗後再試。");
-        return;
-      }
-      const doc = win.document;
-      const titleSafe = escHtml(String(subject || "Email 預覽").slice(0, 200));
-      const bodyHtml =
-        String(html).trim() === ""
-          ? '<p style="margin:16px;font:15px/1.6 system-ui,sans-serif;color:#666">（無可預覽內文）</p>'
-          : String(html);
-      doc.open();
-      doc.write("<!DOCTYPE html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\">");
-      doc.write('<meta name="viewport" content="width=device-width,initial-scale=1">');
-      doc.write("<title>");
-      doc.write(titleSafe);
-      doc.write("</title></head><body>");
-      doc.write(bodyHtml);
-      doc.write("</body></html>");
-      doc.close();
-      try {
-        win.opener = null;
-      } catch {
-        /* 忽略：部分環境禁止設定 */
-      }
+    /**
+     * 將 Email HTML 包成完整文件供 iframe srcdoc 顯示（近似使用者於信箱中看到的樣式；不含執行腳本）。
+     */
+    function wrapEmailHtmlForIframeSrcdoc(htmlFragment, subject) {
+      const raw = htmlFragment == null ? "" : String(htmlFragment);
+      const bodyInner =
+        raw.trim() === ""
+          ? '<p style="margin:16px;font:15px/1.6 system-ui,sans-serif;color:#666">（無內文）</p>'
+          : raw;
+      const titleSafe = escHtml(String(subject || "Email").slice(0, 200));
+      return (
+        `<!DOCTYPE html><html lang="zh-Hant"><head>` +
+        `<meta charset="utf-8">` +
+        `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+        `<title>${titleSafe}</title>` +
+        `<base target="_blank" rel="noopener noreferrer">` +
+        `<style>html,body{height:auto;min-height:100%;}body{margin:0;padding:16px 20px;background:#fff;color:#111;font-size:15px;line-height:1.65;word-wrap:break-word;-webkit-font-smoothing:antialiased;}</style>` +
+        `</head><body>${bodyInner}</body></html>`
+      );
     }
 
     function buildMessageModalHtml(n) {
@@ -1550,19 +1545,6 @@
         }
         rows.push(
           `<div class="message-field"><span class="message-label">${escHtml(label)}</span><pre class="message-json">${escHtml(jsonStr)}</pre></div>`
-        );
-      }
-
-      function emailBodyRow(item) {
-        const v = item.content === undefined || item.content === null ? "" : String(item.content);
-        rows.push(
-          `<div class="message-field">` +
-            `<div class="message-label-with-action">` +
-            `<span class="message-label">內文：</span>` +
-            `<button type="button" class="mini-btn" data-email-preview aria-label="於新視窗預覽 Email HTML 內文">預覽</button>` +
-            `</div>` +
-            `<span class="message-value">${escHtml(v)}</span>` +
-            `</div>`
         );
       }
 
@@ -1596,8 +1578,13 @@
           textRow("內文：", n.content);
           break;
         case "Email":
-          textRow("主旨：", n.subject);
-          emailBodyRow(n);
+          rows.push(
+            `<div class="message-field message-field--email-preview">` +
+              `<span class="message-label">信件內容</span>` +
+              `<div class="message-email-iframe-wrap">` +
+              `<iframe id="messageEmailPreviewIframe" class="message-email-iframe" title="Email 信件內容" sandbox=""></iframe>` +
+              `</div></div>`
+          );
           break;
         case "LON":
           textRow("主旨：", n.lonSubject || n.subject);
@@ -1912,19 +1899,20 @@
       if (!notification) {
         return;
       }
-      messageModalEmailPreview =
-        notification.channel === "Email"
-          ? { html: notification.content ?? "", subject: notification.subject ?? "" }
-          : null;
       dom.messageModalTitle.textContent = messageModalHeadTitle(notification);
       dom.messageModalFields.innerHTML = buildMessageModalHtml(notification);
+      if (notification.channel === "Email") {
+        const iframe = dom.messageModalFields.querySelector("#messageEmailPreviewIframe");
+        if (iframe) {
+          iframe.srcdoc = wrapEmailHtmlForIframeSrcdoc(notification.content, notification.subject);
+        }
+      }
       dom.messageModal.classList.add("show");
     }
 
     function closeMessageModal() {
       dom.messageModal.classList.remove("show");
       dom.messageModalFields.innerHTML = "";
-      messageModalEmailPreview = null;
     }
 
     function closeRecipientModal() {
@@ -1961,16 +1949,38 @@
       });
     }
 
+    /**
+     * 傳送對象清單排序：證券帳號、身分證、姓名皆依 A–Z／0–9（含數字區段）遞增；最後以序號穩定排序。
+     */
+    function compareRecipientsAlphanumeric(a, b) {
+      const opts = { numeric: true, sensitivity: "base" };
+      const byAccount = String(a.account ?? "").localeCompare(String(b.account ?? ""), "zh-Hant", opts);
+      if (byAccount !== 0) {
+        return byAccount;
+      }
+      const byId = String(a.idNo ?? "").localeCompare(String(b.idNo ?? ""), "zh-Hant", opts);
+      if (byId !== 0) {
+        return byId;
+      }
+      const byName = String(a.name ?? "").localeCompare(String(b.name ?? ""), "zh-Hant", opts);
+      if (byName !== 0) {
+        return byName;
+      }
+      return (a.serial || 0) - (b.serial || 0);
+    }
+
     function getFilteredRecipients() {
       const notification = state.recipient.notification;
       if (!notification || !state.recipient.hasSearched) {
         return [];
       }
       const filters = state.recipient.filters;
-      return notification.recipients.filter((item) => (
-        includesText(item.idNo, filters.idNo) &&
-        includesText(item.name, filters.name)
-      ));
+      return notification.recipients
+        .filter((item) => (
+          includesText(item.idNo, filters.idNo) &&
+          includesText(item.name, filters.name)
+        ))
+        .sort(compareRecipientsAlphanumeric);
     }
 
     function syncMainFiltersFromDom() {
@@ -2130,7 +2140,7 @@
         序號: item.serial,
         身分證: item.idNo,
         姓名: item.name,
-        帳號: item.account,
+        證券帳號: item.account,
         發送狀態: isChannelWithoutSendStats(channel) ? "-" : csvField(item.status)
       }));
     }
