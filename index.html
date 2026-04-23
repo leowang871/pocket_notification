@@ -714,75 +714,6 @@
       font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
     }
 
-    .help-channel-wrap {
-      display: inline-block;
-      max-width: 100%;
-    }
-
-    .help-channel-caption {
-      margin: 14px 0 8px;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .help-channel-table {
-      display: inline-table;
-      width: auto;
-      min-width: 0;
-      max-width: 100%;
-      border-collapse: collapse;
-      font-size: 15px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      overflow: hidden;
-      table-layout: fixed;
-    }
-
-    .help-channel-col-channel {
-      width: 8.5rem;
-    }
-
-    .help-channel-col-code {
-      width: 2.75rem;
-    }
-
-    .help-channel-table th,
-    .help-channel-table td {
-      padding: 6px 8px;
-      text-align: left;
-      border-bottom: 1px solid var(--line);
-      vertical-align: middle;
-    }
-
-    .help-channel-table th:first-child,
-    .help-channel-table td:first-child {
-      white-space: nowrap;
-    }
-
-    .help-channel-table th:last-child,
-    .help-channel-table td:last-child {
-      white-space: nowrap;
-      text-align: center;
-      padding-left: 6px;
-      padding-right: 6px;
-      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-      font-weight: 600;
-    }
-
-    .help-channel-table tbody td:last-child {
-      color: var(--primary);
-    }
-
-    .help-channel-table tr:last-child td {
-      border-bottom: 0;
-    }
-
-    .help-channel-table thead th {
-      background: var(--primary-soft);
-      font-weight: 600;
-    }
-
     .message-field {
       margin-bottom: 24px;
       font-size: 16px;
@@ -1028,7 +959,6 @@
                   <th>建立者</th>
                   <th>發送狀態</th>
                   <th>傳送對象</th>
-                  <th>編號</th>
                 </tr>
               </thead>
               <tbody id="mainTableBody"></tbody>
@@ -1130,55 +1060,6 @@
           <li>發送狀態為訊息中心發送給外部廠商的結果，無法判斷用戶是否收到。</li>
           <li>ＭＡＰ識別碼為ＭＡＰ系統對該批次之辨識。</li>
         </ul>
-        <div class="help-channel-wrap">
-        <p class="help-channel-caption">管道代碼如下：</p>
-        <table class="help-channel-table" role="grid" aria-label="發送管道與編號代碼對照">
-          <colgroup>
-            <col class="help-channel-col-channel" />
-            <col class="help-channel-col-code" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th scope="col">發送管道</th>
-              <th scope="col">代碼</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>APP離線推播</td>
-              <td>PUH</td>
-            </tr>
-            <tr>
-              <td>APP春聯</td>
-              <td>CPL</td>
-            </tr>
-            <tr>
-              <td>APP彈窗</td>
-              <td>POP</td>
-            </tr>
-            <tr>
-              <td>APP跑馬燈</td>
-              <td>MAR</td>
-            </tr>
-            <tr>
-              <td>簡訊</td>
-              <td>SMS</td>
-            </tr>
-            <tr>
-              <td>LON</td>
-              <td>LON</td>
-            </tr>
-            <tr>
-              <td>line@</td>
-              <td>LINE</td>
-            </tr>
-            <tr>
-              <td>Email</td>
-              <td>MAIL</td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
       </div>
     </div>
   </div>
@@ -1688,7 +1569,6 @@
           <td>${formatCreatorTableHtml(item)}</td>
           <td>${mainTableStatDash(item.channel) ?? renderStatusBadge(item.status)}</td>
           <td><button type="button" class="mini-btn" data-notification-id="${item.pk}">查看</button></td>
-          <td>${escHtml(item.displayNo)}</td>
         </tr>
       `).join("");
 
@@ -1706,7 +1586,7 @@
         dom.mainPagingInfo.innerHTML = `共有 <strong>0</strong> 筆資料`;
         dom.mainTableBody.innerHTML = `
           <tr>
-            <td colspan="11"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
+            <td colspan="10"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
           </tr>
         `;
         dom.mainPageNav.innerHTML = "";
@@ -1727,7 +1607,7 @@
       if (total === 0) {
         dom.mainTableBody.innerHTML = `
           <tr>
-            <td colspan="11"><div class="empty">查無符合條件的通知紀錄。</div></td>
+            <td colspan="10"><div class="empty">查無符合條件的通知紀錄。</div></td>
           </tr>
         `;
         dom.mainPageNav.innerHTML = "";
@@ -2128,8 +2008,7 @@
           發送總數: dash ?? item.totalCount,
           發送失敗數: dash ?? item.failedCount,
           建立者: formatCreatorCsvValue(item),
-          發送狀態: dash ?? item.status,
-          編號: item.displayNo
+          發送狀態: dash ?? item.status
         };
       });
     }
@@ -2186,37 +2065,6 @@
         s += chars[(index * 13 + i * 7) % chars.length];
       }
       return s;
-    }
-
-    /** 編號用管道代碼（與畫面上中文管道名對應）。 */
-    function channelToDisplayCode(channel) {
-      switch (channel) {
-        case "APP離線推播":
-          return "PUH";
-        case "APP春聯":
-          return "CPL";
-        case "APP彈窗":
-          return "POP";
-        case "APP跑馬燈":
-          return "MAR";
-        case "簡訊":
-          return "SMS";
-        case "LON":
-          return "LON";
-        case "line@":
-          return "LINE";
-        case "Email":
-          return "MAIL";
-        default:
-          return "OTH";
-      }
-    }
-
-    /** 顯示編號：YYYYMMDD＋管道代碼＋0000（無分隔符；四位流水，原型以索引示意）。 */
-    function buildDisplayNo(notifyDateYyyyMmDd, channel, sequence) {
-      const ymd = String(notifyDateYyyyMmDd || "").replaceAll("-", "");
-      const code = channelToDisplayCode(channel);
-      return `${ymd}${code}${String(sequence).padStart(4, "0")}`;
     }
 
     function buildMockData() {
@@ -2370,7 +2218,6 @@
         const creatorPk = hasCreator ? `PK${String(pk - 10000).padStart(3, "0")}` : "";
         const source = sourcePool[index % sourcePool.length];
         const batchNo = `BATCH-2026${month}${day}-${String(index + 1).padStart(3, "0")}`;
-        const displayNo = buildDisplayNo(notifyDate, channel, index + 1);
         const coupletStartDT = channel === "APP春聯" ? `${notifyDate}T${hour}:${minute}:00` : "";
         const endDay = String(Math.min(Number(day) + 5, 28)).padStart(2, "0");
         const coupletEndDT = channel === "APP春聯" ? `2026-${month}-${endDay}T23:59:00` : "";
@@ -2382,7 +2229,6 @@
 
         return {
           mapId,
-          displayNo,
           pk,
           notifyDate,
           notifyTime,
