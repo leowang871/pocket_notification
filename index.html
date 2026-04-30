@@ -1298,46 +1298,102 @@
       });
     }
 
-    function smsBodyTrimmed(item) {
-      return String(item.content || "").trim();
+    function trimStr(value) {
+      return String(value ?? "").trim();
     }
 
-    /** 簡訊「通知標題」：取彈窗內文（content）前 10 字；無內文則「-」。 */
-    function previewSmsTitleFromBody(item) {
-      const c = smsBodyTrimmed(item);
-      if (!c) {
-        return "-";
+    /** 用於「主旨／內文」遞補時的主旨欄位（含 LON 別名）。 */
+    function subjectForTitle(item) {
+      if (item.channel === "LON") {
+        return trimStr(item.lonSubject) || trimStr(item.subject);
       }
-      return c.slice(0, 10);
+      return trimStr(item.subject);
     }
 
-    /** 主表「通知標題」欄 tooltip：簡訊為完整內文；其餘為完整主旨；無則「-」。 */
-    function listNotifyTitleText(item) {
-      if (item.channel === "簡訊") {
-        return smsBodyTrimmed(item) || "-";
+    /** 用於「無主旨則內文前 10 字」的內文來源（依管道）。 */
+    function primaryBodyText(item) {
+      if (item.channel === "line@") {
+        return trimStr(item.lineTextBody) || trimStr(item.content);
       }
-      const s = String(item.subject || "").trim();
-      return s || "-";
-    }
-
-    /** 通知內容彈窗頂部：簡訊為內文前 10 字；其餘（含 Email）為主旨／內文全文（與主表 tooltip 一致）。 */
-    function messageModalHeadTitle(item) {
-      if (item.channel === "簡訊") {
-        return previewSmsTitleFromBody(item);
+      if (item.channel === "APP跑馬燈") {
+        return trimStr(item.tickerContent) || trimStr(item.content);
       }
-      return listNotifyTitleText(item);
+      return trimStr(item.content);
     }
 
-    /** 主表「通知標題」欄顯示：簡訊為內文前 10 字；其餘為主旨前 10 字；無則「-」。 */
+    /** line@ 且有 JSON 字串時，列表顯示「Line Bubble」。 */
+    function lineAtIsJsonPayload(item) {
+      return item.channel === "line@" && trimStr(item.lineJson) !== "";
+    }
+
+    /**
+     * line@ 僅有圖片：無發送標題、無主旨、無內文，有附圖，且非 JSON 訊息時顯示「圖片」。
+     */
+    function lineAtIsImageOnlyLabel(item) {
+      if (item.channel !== "line@") {
+        return false;
+      }
+      if (lineAtIsJsonPayload(item)) {
+        return false;
+      }
+      if (trimStr(item.notifyTitle) || subjectForTitle(item) || primaryBodyText(item)) {
+        return false;
+      }
+      return Boolean(trimStr(item.lineImageUrl));
+    }
+
+    /**
+     * 主表「通知標題」欄顯示：發送標題 →（line@：JSON／僅圖片）→ 主旨前 10 字 → 內文前 10 字；無則「-」。
+     * 欄位已為可點選按鈕，開啟通知內容二層視窗。
+     */
     function previewNotifyTitle(item) {
-      if (item.channel === "簡訊") {
-        return previewSmsTitleFromBody(item);
+      const sent = trimStr(item.notifyTitle);
+      if (sent) {
+        return sent.slice(0, 10);
       }
-      const s = String(item.subject || "").trim();
-      if (!s) {
-        return "-";
+      if (lineAtIsJsonPayload(item)) {
+        return "Line Bubble";
       }
-      return s.slice(0, 10);
+      if (lineAtIsImageOnlyLabel(item)) {
+        return "圖片";
+      }
+      const subj = subjectForTitle(item);
+      if (subj) {
+        return subj.slice(0, 10);
+      }
+      const body = primaryBodyText(item);
+      if (body) {
+        return body.slice(0, 10);
+      }
+      return "-";
+    }
+
+    /** 主表「通知標題」欄 tooltip：對應列表規則之完整字串（非前 10 字截斷）。 */
+    function listNotifyTitleText(item) {
+      const sent = trimStr(item.notifyTitle);
+      if (sent) {
+        return sent;
+      }
+      if (lineAtIsJsonPayload(item)) {
+        return "Line Bubble";
+      }
+      if (lineAtIsImageOnlyLabel(item)) {
+        return "圖片";
+      }
+      const subj = subjectForTitle(item);
+      if (subj) {
+        return subj;
+      }
+      const body = primaryBodyText(item);
+      if (body) {
+        return body;
+      }
+      return "-";
+    }
+
+    /** 通知內容二層視窗頂部標題：與主表「通知標題」欄相同邏輯。 */
+    function messageModalHeadTitle(item) {
+      return previewNotifyTitle(item);
     }
 
     function isChannelWithoutSendStats(channel) {
@@ -1762,10 +1818,7 @@
         name: ""
       };
       syncRecipientFiltersToDom();
-      const recvTitlePart = notification.channel === "簡訊"
-        ? previewSmsTitleFromBody(notification)
-        : listNotifyTitleText(notification);
-      dom.modalTitle.textContent = `傳送對象 | ${recvTitlePart}`;
+      dom.modalTitle.textContent = `傳送對象 | ${listNotifyTitleText(notification)}`;
       const statPart = isChannelWithoutSendStats(notification.channel)
         ? "-"
         : notification.status;
@@ -2202,8 +2255,14 @@
               null,
               2
             );
+            notifyTitle = "";
+            subject = "";
+            content = "";
           } else if (mode === 1) {
             lineImageUrl = `https://picsum.photos/seed/line${pk}/520/240`;
+            notifyTitle = "";
+            subject = "";
+            content = "";
           } else {
             lineTextBody = content;
           }
