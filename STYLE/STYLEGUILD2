@@ -1,0 +1,215 @@
+<div style="overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 8px; display: inline-flex">
+  <div style="align-self: stretch; background: white; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 8px; display: flex">
+    <div style="justify-content: flex-start; align-items: center; gap: 4px; display: inline-flex">
+      <div style="width: 99px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">推播類別</div>
+      </div>
+      <div style="width: 130px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">建立時間</div>
+        <div style="width: 24px; height: 24px; position: relative">
+          <div style="width: 10px; height: 16px; left: 7px; top: 4px; position: absolute">
+            <div style="width: 6px; height: 10px; left: 10px; top: 0px; position: absolute; transform: rotate(90deg); transform-origin: top left; background: #9E9E9F"></div>
+            <div style="width: 6px; height: 10px; left: 0px; top: 16px; position: absolute; transform: rotate(-90deg); transform-origin: top left; background: #9E9E9F"></div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 130px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; display: flex">
+        <div style="width: 85px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">發送時間</div>
+        <div style="width: 24px; height: 24px; position: relative">
+          <div style="width: 10px; height: 16px; left: 7px; top: 4px; position: absolute">
+            <div style="width: 6px; height: 10px; left: 10px; top: 0px; position: absolute; transform: rotate(90deg); transform-origin: top left; background: #9E9E9F"></div>
+            <div style="width: 6px; height: 10px; left: 0px; top: 16px; position: absolute; transform: rotate(-90deg); transform-origin: top left; background: #9E9E9F"></div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 120px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">推播管道</div>
+        <div style="width: 24px; height: 24px; position: relative">
+          <div style="width: 10px; height: 16px; left: 7px; top: 4px; position: absolute">
+            <div style="width: 6px; height: 10px; left: 10px; top: 0px; position: absolute; transform: rotate(90deg); transform-origin: top left; background: #9E9E9F"></div>
+            <div style="width: 6px; height: 10px; left: 0px; top: 16px; position: absolute; transform: rotate(-90deg); transform-origin: top left; background: #9E9E9F"></div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 350px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">傳送主旨/內文</div>
+      </div>
+      <div style="width: 100px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">發送總量</div>
+      </div>
+      <div style="width: 110px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">發送成功數</div>
+      </div>
+      <div style="width: 100px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">紀錄</div>
+      </div>
+      <div style="width: 172px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FBE3E3; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 500; word-wrap: break-word">操作</div>
+      </div>
+    </div>
+    <div style="justify-content: flex-start; align-items: center; display: inline-flex">
+      <div style="width: 99px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">系統推播</div>
+      </div>
+      <div style="width: 130px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">2023/06/01<br/>19:43:19</div>
+      </div>
+      <div style="width: 134px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">2023/08/01<br/>19:43:19</div>
+      </div>
+      <div style="width: 124px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">email</div>
+      </div>
+      <div style="width: 354px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">【口袋證券】您剛剛成功登入</div>
+      </div>
+      <div style="width: 104px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">0</div>
+      </div>
+      <div style="width: 114px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">0</div>
+      </div>
+      <div style="width: 104px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">查看</div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 180px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 4px; display: flex">
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">複製</div>
+          </div>
+        </div>
+        <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+          <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">編輯</div>
+        </div>
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">刪除</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="justify-content: flex-start; align-items: center; display: inline-flex">
+      <div style="width: 99px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">人工推播</div>
+      </div>
+      <div style="width: 130px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">2023/06/01<br/>19:43:19</div>
+      </div>
+      <div style="width: 134px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">2023/08/01<br/>19:43:19</div>
+      </div>
+      <div style="width: 124px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">台股APP</div>
+      </div>
+      <div style="width: 354px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">【口袋證券】您剛剛成功登入</div>
+      </div>
+      <div style="width: 104px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">0</div>
+      </div>
+      <div style="width: 114px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">0</div>
+      </div>
+      <div style="width: 104px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">查看</div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 180px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 4px; display: flex">
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">複製</div>
+          </div>
+        </div>
+        <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+          <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">編輯</div>
+        </div>
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">刪除</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="justify-content: flex-start; align-items: center; display: inline-flex">
+      <div style="width: 99px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">系統推播</div>
+      </div>
+      <div style="width: 130px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">2023/06/01<br/>19:43:19</div>
+      </div>
+      <div style="width: 134px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">2023/06/01<br/>19:43:19</div>
+      </div>
+      <div style="width: 124px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">美股APP</div>
+      </div>
+      <div style="width: 354px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">【口袋證券】您剛剛成功登入</div>
+      </div>
+      <div style="width: 104px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">0</div>
+      </div>
+      <div style="width: 114px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">0</div>
+      </div>
+      <div style="width: 104px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">查看</div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 180px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #EEEEEF; justify-content: center; align-items: center; gap: 4px; display: flex">
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">複製</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="justify-content: flex-start; align-items: center; display: inline-flex">
+      <div style="width: 99px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">人工推播</div>
+      </div>
+      <div style="width: 130px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">2023/06/01<br/>19:43:19</div>
+      </div>
+      <div style="width: 134px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">2023/06/01<br/>19:43:19</div>
+      </div>
+      <div style="width: 124px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 2px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">簡訊</div>
+      </div>
+      <div style="width: 354px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">【口袋證券】您剛剛成功登入</div>
+      </div>
+      <div style="width: 104px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">0</div>
+      </div>
+      <div style="width: 114px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: black; font-size: 17px; font-family: Noto Sans TC; font-weight: 400; text-decoration: underline; word-wrap: break-word">0</div>
+      </div>
+      <div style="width: 104px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 10px; display: flex">
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">查看</div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 180px; align-self: stretch; padding-left: 12px; padding-right: 12px; padding-top: 8px; padding-bottom: 8px; background: #FFF2F2; justify-content: center; align-items: center; gap: 4px; display: flex">
+        <div style="justify-content: flex-start; align-items: center; gap: 4px; display: flex">
+          <div style="padding-left: 12px; padding-right: 12px; padding-top: 4px; padding-bottom: 4px; background: white; border-radius: 8px; outline: 1px #E95465 solid; outline-offset: -1px; justify-content: flex-start; align-items: flex-start; gap: 4px; display: flex">
+            <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: #E95465; font-size: 14px; font-family: Noto Sans TC; font-weight: 400; word-wrap: break-word">複製</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

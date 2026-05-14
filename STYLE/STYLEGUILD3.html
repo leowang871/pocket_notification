@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>提醒 — STYLEGUILD3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --line: #9e9e9f;
+      --primary: #e95465;
+      --text: #000000;
+      --white: #ffffff;
+      --radius: 8px;
+      --shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8e8ea;
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    /* 來源：STYLEGUILD3 — 480px 提醒對話框 */
+    .guild3-dialog {
+      width: 480px;
+      max-width: calc(100vw - 32px);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .guild3-dialog__header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .guild3-dialog__title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .guild3-dialog__rule {
+      height: 0;
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 0;
+    }
+
+    .guild3-dialog__body {
+      padding: 32px 40px 0;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .guild3-dialog__message {
+      margin: 0;
+      width: 100%;
+      min-height: 75px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .guild3-dialog__footer {
+      padding: 24px 40px 32px;
+      background: var(--white);
+      border-radius: 0 0 var(--radius) var(--radius);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .guild3-dialog__btn {
+      width: 140px;
+      height: 40px;
+      padding: 9px 16px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.1s ease;
+    }
+
+    .guild3-dialog__btn:hover {
+      filter: brightness(1.05);
+    }
+
+    .guild3-dialog__btn:active {
+      transform: scale(0.98);
+    }
+
+    .guild3-dialog__btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div
+    class="guild3-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="guild3-title"
+    aria-describedby="guild3-desc"
+  >
+    <header class="guild3-dialog__header">
+      <h1 id="guild3-title" class="guild3-dialog__title">提醒</h1>
+    </header>
+    <hr class="guild3-dialog__rule" />
+    <div class="guild3-dialog__body">
+      <p id="guild3-desc" class="guild3-dialog__message">送出成功</p>
+    </div>
+    <footer class="guild3-dialog__footer">
+      <button type="button" class="guild3-dialog__btn" id="guild3Confirm">確認</button>
+    </footer>
+  </div>
+</body>
+</html>

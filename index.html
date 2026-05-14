@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>通知中心紀錄後台</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap");
+
+    :root {
+      --primary: #e95465;
+      --primary-soft: #fbe3e3;
+      --row-soft: #eeeeef;
+      --row-alt: #fff2f2;
+      --line: #9e9e9f;
+      --text: #111111;
+      --muted: #6b7280;
+      --bg: #f6f6f7;
+      --white: #ffffff;
+      --shadow: 3px 5px 10px rgba(0, 0, 0, 0.1);
+      --radius: 10px;
+      --sidebar-w: 248px;
+      --sidebar-bg: #ececee;
+      --sidebar-border: #d8d8dc;
+      --pager-coral: #f05a66;
+      --pager-gray: #9e9e9e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+      grid-template-rows: 60px 1fr;
+      grid-template-areas:
+        "topbar topbar"
+        "sidebar main";
+    }
+
+    .app-sidebar {
+      grid-area: sidebar;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-nav {
+      padding: 20px 0 32px;
+    }
+
+    .sidebar-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .sidebar-list li {
+      margin: 0;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 10px 20px 10px 24px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #3e3a39;
+      text-decoration: none;
+      line-height: 1.35;
+      border-left: 3px solid transparent;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(255, 255, 255, 0.65);
+      color: var(--primary);
+    }
+
+    .sidebar-link.is-active {
+      color: var(--primary);
+      font-weight: 700;
+      background: rgba(233, 84, 101, 0.08);
+      border-left-color: var(--primary);
+    }
+
+    .sidebar-group-label {
+      margin: 18px 0 8px;
+      padding: 0 24px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #3e3a39;
+    }
+
+    .topbar {
+      grid-area: topbar;
+      height: 60px;
+      background: var(--white);
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      height: 40px;
+      width: auto;
+      display: block;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 16px;
+    }
+
+    .brand-env {
+      font-size: 18px;
+      font-weight: 500;
+      color: #3e3a39;
+    }
+
+    .main {
+      grid-area: main;
+      padding: 18px 22px 32px 28px;
+      overflow-x: auto;
+      min-width: 0;
+    }
+
+    .main-inner {
+      width: min(100%, 1380px);
+      margin: 0;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      margin-bottom: 0;
+    }
+
+    .page-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 32px 32px;
+    }
+
+    .page-title {
+      margin: 0 0 20px;
+      font-size: 32px;
+      font-weight: 900;
+    }
+
+    .page-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .page-card-header .page-title {
+      margin-bottom: 0;
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 20px;
+    }
+
+    .filter-full {
+      grid-column: 1 / -1;
+    }
+
+    .field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .field label {
+      width: 128px;
+      flex: 0 0 128px;
+      font-size: 16px;
+    }
+
+    .control,
+    .date-range {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .control input,
+    .control select,
+    .date-range input,
+    .page-size select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+      padding: 6px 10px;
+      font-size: 15px;
+    }
+
+    .date-range span {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-width: 120px;
+      height: 40px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      border: 1px solid var(--primary);
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--primary);
+    }
+
+    .summary-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 15px;
+    }
+
+    .summary-bar .count strong {
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1220px;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 8px 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    thead th {
+      background: var(--primary-soft);
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: var(--row-soft);
+    }
+
+    tbody tr:nth-child(even) td {
+      background: var(--row-alt);
+    }
+
+    .subject-cell,
+    .content-cell {
+      text-align: left;
+    }
+
+    .underlined {
+      text-decoration: underline;
+    }
+
+    .subject-link {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .mini-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 68px;
+      min-height: 30px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+      background: var(--white);
+      color: var(--primary);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 72px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--white);
+      border: 1px solid var(--line);
+    }
+
+    .status-success {
+      color: #15803d;
+      border-color: #15803d;
+    }
+
+    .status-warning {
+      color: #c2410c;
+      border-color: #fb923c;
+    }
+
+    .status-danger {
+      color: #b91c1c;
+      border-color: #ef4444;
+    }
+
+    .status-info {
+      color: #0369a1;
+      border-color: #38bdf8;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .pagination.pagination-main {
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .recipient-pagination {
+      justify-content: center;
+    }
+
+    .main-table-wrap {
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .page-size,
+    .page-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 15px;
+    }
+
+    .pager-ring {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      min-height: 40px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1;
+      padding: 0;
+      font-family: inherit;
+      background: var(--white);
+      border: 1px solid var(--pager-coral);
+      color: var(--pager-coral);
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    }
+
+    .pager-ring--nav {
+      border-color: var(--pager-gray);
+      color: var(--pager-gray);
+    }
+
+    .pager-ring--nav.is-disabled,
+    .pager-ring--nav:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .pager-ring--page.is-active {
+      background: var(--pager-coral);
+      color: var(--white);
+      border-color: var(--pager-coral);
+    }
+
+    .pager-ring--page:not(.is-active):hover {
+      background: rgba(240, 90, 102, 0.08);
+    }
+
+    .pager-ring--nav:not(:disabled):not(.is-disabled):hover {
+      background: rgba(158, 158, 158, 0.12);
+    }
+
+    .pager-ring--ellipsis {
+      cursor: default;
+      user-select: none;
+      letter-spacing: 0.04em;
+      font-size: 14px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.25);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 30;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    /* STYLEGUILD3：提醒對話框（匯出前置提示等） */
+    .modal-backdrop.guild3-reminder-backdrop {
+      z-index: 50;
+    }
+
+    .guild3-dialog {
+      width: 480px;
+      max-width: calc(100vw - 32px);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      background: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+    }
+
+    .guild3-dialog__header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+    }
+
+    .guild3-dialog__title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #000000;
+      text-align: center;
+    }
+
+    .guild3-dialog__rule {
+      height: 0;
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 0;
+    }
+
+    .guild3-dialog__body {
+      padding: 32px 40px 0;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .guild3-dialog__message {
+      margin: 0;
+      width: 100%;
+      min-height: 75px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      color: #000000;
+      line-height: 1.5;
+    }
+
+    .guild3-dialog__footer {
+      padding: 24px 40px 32px;
+      background: var(--white);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .guild3-dialog__btn {
+      width: 140px;
+      height: 40px;
+      padding: 9px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.1s ease;
+    }
+
+    .guild3-dialog__btn:hover {
+      filter: brightness(1.05);
+    }
+
+    .guild3-dialog__btn:active {
+      transform: scale(0.98);
+    }
+
+    .guild3-dialog__btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .modal {
+      width: min(1120px, calc(100vw - 48px));
+      max-height: 90vh;
+      overflow: auto;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 3px 5px 10px rgba(0, 0, 0, 0.18);
+      padding: 28px;
+    }
+
+    .modal.help-modal {
+      width: min(640px, calc(100vw - 48px));
+      padding: 28px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .modal-subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .empty {
+      background: var(--row-soft);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .message-modal {
+      width: min(800px, calc(100vw - 48px));
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .message-modal-header {
+      background: #fb5868;
+      color: var(--white);
+      min-height: 48px;
+      display: grid;
+      grid-template-columns: 1fr minmax(0, 1fr) 1fr;
+      align-items: center;
+      padding: 12px 16px;
+    }
+
+    .message-modal-title {
+      grid-column: 2;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 0 8px;
+      justify-self: stretch;
+      line-height: 1.45;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .message-close-icon {
+      grid-column: 3;
+      justify-self: end;
+      border: 0;
+      background: transparent;
+      color: var(--white);
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .message-modal-body {
+      padding: 28px 30px 28px;
+      background: var(--white);
+    }
+
+    .message-line-image {
+      margin: 12px 0 0;
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      display: block;
+    }
+
+    .help-modal .modal-header {
+      margin-bottom: 16px;
+    }
+
+    .help-modal-body {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--text);
+    }
+
+    .help-modal-body ul {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .help-modal-body li {
+      margin-bottom: 10px;
+    }
+
+    .help-modal-body code {
+      font-size: 0.92em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #ececee;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    }
+
+    .message-field {
+      margin-bottom: 24px;
+      font-size: 16px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .message-label {
+      font-weight: 500;
+    }
+
+    .message-label-with-action {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .message-label-with-action .message-label {
+      margin: 0;
+    }
+
+    .message-value {
+      display: block;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .message-json {
+      margin: 8px 0 0;
+      padding: 12px 14px;
+      background: #f3f4f6;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message-modal-actions {
+      display: flex;
+      justify-content: center;
+      padding-top: 8px;
+    }
+
+    .message-email-iframe-wrap {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .message-email-iframe {
+      width: 100%;
+      min-height: 360px;
+      height: min(58vh, 520px);
+      border: 0;
+      display: block;
+    }
+
+    .message-field--email-preview .message-email-iframe-wrap {
+      margin-top: 10px;
+    }
+
+    .title-preview-cell {
+      text-align: left;
+      max-width: 220px;
+    }
+
+    .creator-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      line-height: 1.25;
+      min-width: 5.5em;
+    }
+
+    .creator-cell__line {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .creator-cell__pk {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: 60px auto 1fr;
+        grid-template-areas:
+          "topbar"
+          "sidebar"
+          "main";
+      }
+
+      .app-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--sidebar-border);
+        max-height: min(50vh, 320px);
+      }
+
+      .page-card,
+      .modal {
+        padding: 20px 16px;
+      }
+
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field,
+      .summary-bar,
+      .modal-header,
+      .pagination {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .field label {
+        width: auto;
+        flex: initial;
+      }
+
+      .main-inner {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <header class="topbar">
+      <div class="brand">
+        <img
+          class="brand-logo"
+          src="file:///C:/Users/leowang/.cursor/projects/c-Users-leowang-cursor-projects/assets/c__Users_leowang_AppData_Roaming_Cursor_User_workspaceStorage_aa91ad98f519a14af1466af24533ac3c_images_images-1027f60c-b3e3-4443-9742-3b1ff7e1b341.png"
+          alt="口袋證券"
+        >
+        <div class="brand-env">測試環境</div>
+      </div>
+      <div class="topbar-actions">
+        <div>最高權限者 pk099，您好</div>
+        <button class="btn btn-secondary" style="min-width: 100px; height: 35px;">登出</button>
+      </div>
+    </header>
+
+    <aside class="app-sidebar" aria-label="後台主選單">
+      <nav class="sidebar-nav">
+        <ul class="sidebar-list">
+          <li><a href="#" class="sidebar-link">首頁</a></li>
+          <li><a href="#" class="sidebar-link">審核</a></li>
+          <li><a href="#" class="sidebar-link">客戶管理</a></li>
+          <li><a href="#" class="sidebar-link">資料查詢</a></li>
+          <li><a href="#" class="sidebar-link">商品檔</a></li>
+        </ul>
+        <p class="sidebar-group-label">推播訊息</p>
+        <ul class="sidebar-list">
+          <li><a href="#" class="sidebar-link">人工推播(App離線推播)</a></li>
+          <li><a href="#" class="sidebar-link">人工推播(簡訊)</a></li>
+          <li><a href="#" class="sidebar-link">人工推播(email)</a></li>
+          <li><a href="#" class="sidebar-link">文宣上架</a></li>
+          <li><a href="#" class="sidebar-link">App 通知中心</a></li>
+          <li><a href="#" class="sidebar-link is-active" aria-current="page">推播紀錄</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="main-inner">
+      <section class="page-card">
+        <div class="page-card-header">
+          <h1 class="page-title">通知紀錄</h1>
+          <button type="button" class="btn btn-secondary" id="systemHelpBtn">系統說明</button>
+        </div>
+
+        <div class="section">
+          <div class="filter-grid">
+            <div class="field">
+              <label>MAP識別碼：</label>
+              <div class="control"><input type="text" id="mainMapId" maxlength="5" placeholder="5 字識別碼"></div>
+            </div>
+            <div class="field">
+              <label>身分證：</label>
+              <div class="control"><input type="text" id="mainIdNo" placeholder="搜尋身分證字號（比對傳送對象）"></div>
+            </div>
+            <div class="field filter-full">
+              <label>通知時間區間：</label>
+              <div class="date-range">
+                <input type="datetime-local" id="mainNotifyStart">
+                <span>～</span>
+                <input type="datetime-local" id="mainNotifyEnd">
+              </div>
+            </div>
+            <div class="field filter-full">
+              <label>通知標題：</label>
+              <div class="control"><input type="text" id="mainTitleKeyword" placeholder="搜尋通知標題、主旨或內文關鍵字"></div>
+            </div>
+            <div class="field">
+              <label>發送管道：</label>
+              <div class="control"><select id="mainChannel"></select></div>
+            </div>
+            <div class="field">
+              <label>發送狀態：</label>
+              <div class="control"><select id="mainStatus"></select></div>
+            </div>
+            <div class="field filter-full">
+              <label>建立者：</label>
+              <div class="control"><input type="text" id="mainCreator" placeholder="搜尋建立者姓名或 PK 編號"></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-secondary" id="resetMainBtn">清除</button>
+            <button class="btn btn-primary" id="searchMainBtn">查詢</button>
+            <button class="btn btn-secondary" id="exportMainBtn">匯出主清單</button>
+          </div>
+
+          <div class="summary-bar">
+            <div id="queryTime"></div>
+            <div class="count" id="mainPagingInfo"></div>
+          </div>
+
+          <div class="table-wrap main-table-wrap" id="mainTableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>MAP識別碼</th>
+                  <th>通知開始時間</th>
+                  <th>通知結束時間</th>
+                  <th>通知標題</th>
+                  <th>發送管道</th>
+                  <th>發送總數</th>
+                  <th>發送失敗數</th>
+                  <th>建立者</th>
+                  <th>發送狀態</th>
+                  <th>傳送對象</th>
+                </tr>
+              </thead>
+              <tbody id="mainTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="pagination pagination-main">
+            <div class="page-nav" id="mainPageNav" aria-label="主清單分頁"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="recipientModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modalTitle">傳送對象</h2>
+          <p class="modal-subtitle" id="modalSubtitle"></p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" id="exportRecipientsBtn">匯出對象</button>
+          <button class="btn btn-primary" id="closeModalBtn">關閉</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="filter-grid">
+          <div class="field">
+            <label>身分證：</label>
+            <div class="control"><input type="text" id="recipientIdNo" placeholder="搜尋身分證字號"></div>
+          </div>
+          <div class="field">
+            <label>姓名：</label>
+            <div class="control"><input type="text" id="recipientName" placeholder="搜尋姓名"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-secondary" id="resetRecipientsBtn">清除</button>
+          <button class="btn btn-primary" id="searchRecipientsBtn">查詢</button>
+        </div>
+
+        <div class="summary-bar">
+          <div></div>
+          <div class="count" id="recipientPagingInfo"></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>序號</th>
+                <th>身分證</th>
+                <th>姓名</th>
+                <th>證券帳號</th>
+                <th>發送狀態</th>
+              </tr>
+            </thead>
+            <tbody id="recipientTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination recipient-pagination">
+          <div class="page-nav" id="recipientPageNav" aria-label="傳送對象分頁"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="messageModal">
+    <div class="modal message-modal">
+      <div class="message-modal-header">
+        <div></div>
+        <div class="message-modal-title" id="messageModalTitle"></div>
+        <button class="message-close-icon" id="messageCloseIcon" aria-label="關閉">&times;</button>
+      </div>
+      <div class="message-modal-body">
+        <div id="messageModalFields"></div>
+        <div class="message-modal-actions">
+          <button class="btn btn-primary" id="messageConfirmBtn">確認</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="helpModal">
+    <div class="modal help-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">系統說明</h2>
+        <button type="button" class="btn btn-primary" id="helpModalCloseBtn">關閉</button>
+      </div>
+      <div class="help-modal-body">
+        <ul>
+          <li>請先設定查詢條件後按「查詢」，主清單預設不載入資料；查詢結果每頁 10 筆，可使用分頁切換最前頁、上一頁、頁碼、下一頁、最末頁。</li>
+          <li>通知時間區間支援日期與時分。</li>
+          <li>發送狀態為訊息中心發送給外部廠商的結果，無法判斷用戶是否收到。</li>
+          <li>ＭＡＰ識別碼為ＭＡＰ系統對該批次之辨識。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal-backdrop guild3-reminder-backdrop"
+    id="guild3ReminderBackdrop"
+    aria-hidden="true"
+  >
+    <div
+      class="guild3-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="guild3ReminderTitle"
+      aria-describedby="guild3ReminderMsg"
+    >
+      <header class="guild3-dialog__header">
+        <h2 id="guild3ReminderTitle" class="guild3-dialog__title">提醒</h2>
+      </header>
+      <hr class="guild3-dialog__rule" />
+      <div class="guild3-dialog__body">
+        <p id="guild3ReminderMsg" class="guild3-dialog__message"></p>
+      </div>
+      <footer class="guild3-dialog__footer">
+        <button type="button" class="guild3-dialog__btn" id="guild3ReminderConfirm">確認</button>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const channels = [
+      "全部",
+      "APP離線推播",
+      "APP春聯",
+      "APP彈窗",
+      "APP跑馬燈",
+      "簡訊",
+      "LON",
+      "line@",
+      "Email"
+    ];
+    const statuses = ["全部", "成功", "失敗"];
+    const notifications = buildMockData();
+
+    const MAIN_PAGE_SIZE = 10;
+
+    const state = {
+      main: {
+        page: 1,
+        pageSize: MAIN_PAGE_SIZE,
+        hasSearched: false,
+        filters: {
+          mapId: "",
+          idNo: "",
+          notifyStart: "",
+          notifyEnd: "",
+          titleKeyword: "",
+          channel: "全部",
+          status: "全部",
+          creator: ""
+        }
+      },
+      recipient: {
+        notification: null,
+        page: 1,
+        pageSize: 10,
+        hasSearched: false,
+        filters: {
+          idNo: "",
+          name: ""
+        }
+      }
+    };
+
+    const dom = {
+      queryTime: document.getElementById("queryTime"),
+      mainTableBody: document.getElementById("mainTableBody"),
+      mainPagingInfo: document.getElementById("mainPagingInfo"),
+      mainTableWrap: document.getElementById("mainTableWrap"),
+      mainPageNav: document.getElementById("mainPageNav"),
+      mainMapId: document.getElementById("mainMapId"),
+      mainIdNo: document.getElementById("mainIdNo"),
+      mainNotifyStart: document.getElementById("mainNotifyStart"),
+      mainNotifyEnd: document.getElementById("mainNotifyEnd"),
+      mainTitleKeyword: document.getElementById("mainTitleKeyword"),
+      mainChannel: document.getElementById("mainChannel"),
+      mainStatus: document.getElementById("mainStatus"),
+      mainCreator: document.getElementById("mainCreator"),
+      searchMainBtn: document.getElementById("searchMainBtn"),
+      resetMainBtn: document.getElementById("resetMainBtn"),
+      exportMainBtn: document.getElementById("exportMainBtn"),
+      systemHelpBtn: document.getElementById("systemHelpBtn"),
+      helpModal: document.getElementById("helpModal"),
+      helpModalCloseBtn: document.getElementById("helpModalCloseBtn"),
+      messageModal: document.getElementById("messageModal"),
+      messageModalTitle: document.getElementById("messageModalTitle"),
+      messageModalFields: document.getElementById("messageModalFields"),
+      messageCloseIcon: document.getElementById("messageCloseIcon"),
+      messageConfirmBtn: document.getElementById("messageConfirmBtn"),
+      recipientModal: document.getElementById("recipientModal"),
+      modalTitle: document.getElementById("modalTitle"),
+      modalSubtitle: document.getElementById("modalSubtitle"),
+      closeModalBtn: document.getElementById("closeModalBtn"),
+      exportRecipientsBtn: document.getElementById("exportRecipientsBtn"),
+      recipientIdNo: document.getElementById("recipientIdNo"),
+      recipientName: document.getElementById("recipientName"),
+      searchRecipientsBtn: document.getElementById("searchRecipientsBtn"),
+      resetRecipientsBtn: document.getElementById("resetRecipientsBtn"),
+      recipientTableBody: document.getElementById("recipientTableBody"),
+      recipientPagingInfo: document.getElementById("recipientPagingInfo"),
+      recipientPageNav: document.getElementById("recipientPageNav"),
+      guild3ReminderBackdrop: document.getElementById("guild3ReminderBackdrop"),
+      guild3ReminderTitle: document.getElementById("guild3ReminderTitle"),
+      guild3ReminderMsg: document.getElementById("guild3ReminderMsg"),
+      guild3ReminderConfirm: document.getElementById("guild3ReminderConfirm")
+    };
+
+
+    init();
+
+    function init() {
+      fillSelect(dom.mainChannel, channels);
+      fillSelect(dom.mainStatus, statuses);
+      bindEvents();
+      renderMainTable();
+    }
+
+    function showGuild3Reminder(title, message) {
+      dom.guild3ReminderTitle.textContent = title;
+      dom.guild3ReminderMsg.textContent = message;
+      dom.guild3ReminderBackdrop.classList.add("show");
+      dom.guild3ReminderBackdrop.setAttribute("aria-hidden", "false");
+      dom.guild3ReminderConfirm.focus();
+    }
+
+    function closeGuild3Reminder() {
+      dom.guild3ReminderBackdrop.classList.remove("show");
+      dom.guild3ReminderBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    function bindEvents() {
+      dom.searchMainBtn.addEventListener("click", () => {
+        syncMainFiltersFromDom();
+        state.main.hasSearched = true;
+        state.main.page = 1;
+        renderMainTable();
+      });
+
+      dom.resetMainBtn.addEventListener("click", () => {
+        state.main.filters = {
+          mapId: "",
+          idNo: "",
+          notifyStart: "",
+          notifyEnd: "",
+          titleKeyword: "",
+          channel: "全部",
+          status: "全部",
+          creator: ""
+        };
+        state.main.hasSearched = false;
+        state.main.page = 1;
+        syncMainFiltersToDom();
+        renderMainTable();
+      });
+
+      dom.exportMainBtn.addEventListener("click", () => {
+        if (!state.main.hasSearched) {
+          showGuild3Reminder("提醒", "請先輸入查詢條件並執行查詢。");
+          return;
+        }
+        const rows = getFilteredNotifications();
+        exportCsv("通知主清單.csv", mapMainRows(rows));
+      });
+
+      dom.systemHelpBtn.addEventListener("click", () => {
+        dom.helpModal.classList.add("show");
+      });
+      dom.helpModalCloseBtn.addEventListener("click", () => {
+        dom.helpModal.classList.remove("show");
+      });
+      dom.helpModal.addEventListener("click", (event) => {
+        if (event.target === dom.helpModal) {
+          dom.helpModal.classList.remove("show");
+        }
+      });
+
+      dom.messageCloseIcon.addEventListener("click", closeMessageModal);
+      dom.messageConfirmBtn.addEventListener("click", closeMessageModal);
+      dom.messageModal.addEventListener("click", (event) => {
+        if (event.target === dom.messageModal) {
+          closeMessageModal();
+        }
+      });
+
+      dom.closeModalBtn.addEventListener("click", closeRecipientModal);
+      dom.recipientModal.addEventListener("click", (event) => {
+        if (event.target === dom.recipientModal) {
+          closeRecipientModal();
+        }
+      });
+
+      dom.searchRecipientsBtn.addEventListener("click", () => {
+        state.recipient.page = 1;
+        syncRecipientFiltersFromDom();
+        state.recipient.hasSearched = true;
+        renderRecipientTable();
+      });
+
+      dom.resetRecipientsBtn.addEventListener("click", () => {
+        state.recipient.filters = {
+          idNo: "",
+          name: ""
+        };
+        state.recipient.page = 1;
+        state.recipient.hasSearched = false;
+        syncRecipientFiltersToDom();
+        renderRecipientTable();
+      });
+
+      dom.exportRecipientsBtn.addEventListener("click", () => {
+        if (!state.recipient.notification) {
+          return;
+        }
+        if (!state.recipient.hasSearched) {
+          showGuild3Reminder("提醒", "請先於傳送對象輸入查詢條件並執行查詢。");
+          return;
+        }
+        exportCsv("傳送對象明細.csv", mapRecipientRows(getFilteredRecipients()));
+      });
+
+      dom.guild3ReminderConfirm.addEventListener("click", closeGuild3Reminder);
+      dom.guild3ReminderBackdrop.addEventListener("click", (event) => {
+        if (event.target === dom.guild3ReminderBackdrop) {
+          closeGuild3Reminder();
+        }
+      });
+    }
+
+    function trimStr(value) {
+      return String(value ?? "").trim();
+    }
+
+    /** 用於「主旨／內文」遞補時的主旨欄位（含 LON 別名）。 */
+    function subjectForTitle(item) {
+      if (item.channel === "LON") {
+        return trimStr(item.lonSubject) || trimStr(item.subject);
+      }
+      return trimStr(item.subject);
+    }
+
+    /** 用於「無主旨則內文前 10 字」的內文來源（依管道）。 */
+    function primaryBodyText(item) {
+      if (item.channel === "line@") {
+        return trimStr(item.lineTextBody) || trimStr(item.content);
+      }
+      if (item.channel === "APP跑馬燈") {
+        return trimStr(item.tickerContent) || trimStr(item.content);
+      }
+      return trimStr(item.content);
+    }
+
+    /** line@ 且有 JSON 字串時，列表顯示「Line Bubble」。 */
+    function lineAtIsJsonPayload(item) {
+      return item.channel === "line@" && trimStr(item.lineJson) !== "";
+    }
+
+    /**
+     * line@ 僅有圖片：無發送標題、無主旨、無內文，有附圖，且非 JSON 訊息時顯示「圖片」。
+     */
+    function lineAtIsImageOnlyLabel(item) {
+      if (item.channel !== "line@") {
+        return false;
+      }
+      if (lineAtIsJsonPayload(item)) {
+        return false;
+      }
+      if (trimStr(item.notifyTitle) || subjectForTitle(item) || primaryBodyText(item)) {
+        return false;
+      }
+      return Boolean(trimStr(item.lineImageUrl));
+    }
+
+    /**
+     * 主表「通知標題」欄顯示：發送標題 →（line@：JSON／僅圖片）→ 主旨前 10 字 → 內文前 10 字；無則「-」。
+     * 欄位已為可點選按鈕，開啟通知內容二層視窗。
+     */
+    function previewNotifyTitle(item) {
+      const sent = trimStr(item.notifyTitle);
+      if (sent) {
+        return sent.slice(0, 10);
+      }
+      if (lineAtIsJsonPayload(item)) {
+        return "Line Bubble";
+      }
+      if (lineAtIsImageOnlyLabel(item)) {
+        return "圖片";
+      }
+      const subj = subjectForTitle(item);
+      if (subj) {
+        return subj.slice(0, 10);
+      }
+      const body = primaryBodyText(item);
+      if (body) {
+        return body.slice(0, 10);
+      }
+      return "-";
+    }
+
+    /** 主表「通知標題」欄 tooltip：對應列表規則之完整字串（非前 10 字截斷）。 */
+    function listNotifyTitleText(item) {
+      const sent = trimStr(item.notifyTitle);
+      if (sent) {
+        return sent;
+      }
+      if (lineAtIsJsonPayload(item)) {
+        return "Line Bubble";
+      }
+      if (lineAtIsImageOnlyLabel(item)) {
+        return "圖片";
+      }
+      const subj = subjectForTitle(item);
+      if (subj) {
+        return subj;
+      }
+      const body = primaryBodyText(item);
+      if (body) {
+        return body;
+      }
+      return "-";
+    }
+
+    /** 通知內容二層視窗頂部標題：與主表「通知標題」欄相同邏輯。 */
+    function messageModalHeadTitle(item) {
+      return previewNotifyTitle(item);
+    }
+
+    function isChannelWithoutSendStats(channel) {
+      return channel === "APP彈窗" || channel === "APP春聯" || channel === "APP跑馬燈";
+    }
+
+    function mainTableStatDash(channel) {
+      return isChannelWithoutSendStats(channel) ? "-" : null;
+    }
+
+    /** 傳送對象表「發送狀態」：與主表相同，特定管道不顯示個別發送狀態。 */
+    function recipientTableStatusCell(channel, status) {
+      if (isChannelWithoutSendStats(channel)) {
+        return "-";
+      }
+      return renderStatusBadge(status);
+    }
+
+    function matchesTitleKeyword(item, keyword) {
+      if (!keyword) {
+        return true;
+      }
+      return (
+        includesText(item.notifyTitle || "", keyword) ||
+        includesText(item.subject || "", keyword) ||
+        includesText(item.content || "", keyword) ||
+        includesText(item.tickerContent || "", keyword) ||
+        includesText(item.internalName || "", keyword) ||
+        includesText(item.lineTextBody || "", keyword) ||
+        includesText(item.lineJson || "", keyword)
+      );
+    }
+
+    function escHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;");
+    }
+
+    /**
+     * 將 Email HTML 包成完整文件供 iframe srcdoc 顯示（近似使用者於信箱中看到的樣式；不含執行腳本）。
+     */
+    function wrapEmailHtmlForIframeSrcdoc(htmlFragment, subject) {
+      const raw = htmlFragment == null ? "" : String(htmlFragment);
+      const bodyInner =
+        raw.trim() === ""
+          ? '<p style="margin:16px;font:15px/1.6 system-ui,sans-serif;color:#666">（無內文）</p>'
+          : raw;
+      const titleSafe = escHtml(String(subject || "Email").slice(0, 200));
+      return (
+        `<!DOCTYPE html><html lang="zh-Hant"><head>` +
+        `<meta charset="utf-8">` +
+        `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+        `<title>${titleSafe}</title>` +
+        `<base target="_blank" rel="noopener noreferrer">` +
+        `<style>html,body{height:auto;min-height:100%;}body{margin:0;padding:16px 20px;background:#fff;color:#111;font-size:15px;line-height:1.65;word-wrap:break-word;-webkit-font-smoothing:antialiased;}</style>` +
+        `</head><body>${bodyInner}</body></html>`
+      );
+    }
+
+    function buildMessageModalHtml(n) {
+      const rows = [];
+      const ch = n.channel;
+
+      function textRow(label, value) {
+        const v = value === undefined || value === null ? "" : String(value);
+        rows.push(
+          `<div class="message-field"><span class="message-label">${escHtml(label)}</span><span class="message-value">${escHtml(v)}</span></div>`
+        );
+      }
+
+      function imageRow(label, src, alt) {
+        if (!src) {
+          return;
+        }
+        rows.push(
+          `<div class="message-field"><span class="message-label">${escHtml(label)}</span><br><img class="message-line-image" alt="${escHtml(alt || "")}" src="${escHtml(src)}"></div>`
+        );
+      }
+
+      function jsonRow(label, jsonStr) {
+        if (!jsonStr) {
+          return;
+        }
+        rows.push(
+          `<div class="message-field"><span class="message-label">${escHtml(label)}</span><pre class="message-json">${escHtml(jsonStr)}</pre></div>`
+        );
+      }
+
+      switch (ch) {
+        case "APP離線推播":
+          textRow("主旨：", n.subject);
+          textRow("內文：", n.content);
+          textRow("到達網頁：", n.landingUrl);
+          break;
+        case "APP春聯":
+          textRow("外層主旨：", n.notifyTitle);
+          textRow("內容主旨：", n.subject);
+          textRow("內文：", n.content);
+          textRow("到達網頁：", n.landingUrl);
+          break;
+        case "APP彈窗":
+          textRow("主旨：", n.subject);
+          textRow("到達網址：", n.appPopupTargetUrl);
+          if (n.appPopupImageUrl) {
+            imageRow("圖片：", n.appPopupImageUrl, "APP 彈窗附圖");
+          } else {
+            textRow("內文：", n.content);
+          }
+          break;
+        case "APP跑馬燈":
+          textRow("內部名稱：", n.internalName);
+          textRow("跑馬燈內容：", n.tickerContent);
+          textRow("到達網址：", n.marqueeTargetUrl);
+          break;
+        case "簡訊":
+          textRow("內文：", n.content);
+          break;
+        case "Email":
+          rows.push(
+            `<div class="message-field message-field--email-preview">` +
+              `<span class="message-label">信件內容</span>` +
+              `<div class="message-email-iframe-wrap">` +
+              `<iframe id="messageEmailPreviewIframe" class="message-email-iframe" title="Email 信件內容" sandbox=""></iframe>` +
+              `</div></div>`
+          );
+          break;
+        case "LON":
+          textRow("主旨：", n.lonSubject || n.subject);
+          textRow("說明：", n.lonDescription);
+          textRow("資訊欄：", n.lonInfoField);
+          textRow("註冊內容：", n.lonRegisterContent);
+          textRow("註冊時間：", n.lonRegisterTime);
+          textRow("按鈕網址：", n.lonButtonUrl);
+          textRow("按鈕文字：", n.lonButtonText);
+          break;
+        case "line@":
+          if (n.lineTextBody) {
+            textRow("內文：", n.lineTextBody);
+          }
+          if (n.lineImageUrl) {
+            imageRow("圖片：", n.lineImageUrl, "line@ 附圖");
+          }
+          jsonRow("JSON：", n.lineJson);
+          break;
+        default:
+          textRow("通知主旨：", n.subject);
+          textRow("通知內文：", n.content);
+      }
+
+      return rows.join("");
+    }
+
+    function notifyTimeToSortable(notifyTime) {
+      return String(notifyTime || "").replace(" ", "T");
+    }
+
+    function datetimeLocalToSortable(v) {
+      if (!v) {
+        return "";
+      }
+      return v.length === 16 ? `${v}:00` : v;
+    }
+
+    function matchesNotifyTimeRange(item, startLocal, endLocal) {
+      const itemS = notifyTimeToSortable(item.notifyTime);
+      const rs = datetimeLocalToSortable(startLocal);
+      const re = datetimeLocalToSortable(endLocal);
+      if (!rs && !re) {
+        return true;
+      }
+      if (rs && itemS < rs) {
+        return false;
+      }
+      if (re && itemS > re) {
+        return false;
+      }
+      return true;
+    }
+
+    /** 將 YYYY-MM-DDTHH:mm:ss 轉為與 notifyTime 相同風格之 YYYY-MM-DD HH:mm:ss */
+    function formatNotifyWindowDisplay(dt) {
+      if (!dt || String(dt).trim() === "") {
+        return "";
+      }
+      return String(dt).replace("T", " ").slice(0, 19);
+    }
+
+    function mainTableNotifyStartDisplay(item) {
+      if (item.channel === "APP春聯" && item.coupletStartDT) {
+        return formatNotifyWindowDisplay(item.coupletStartDT);
+      }
+      if (
+        (item.channel === "APP彈窗" || item.channel === "APP跑馬燈") &&
+        item.notifyWindowStart
+      ) {
+        return formatNotifyWindowDisplay(item.notifyWindowStart);
+      }
+      return item.notifyTime || "";
+    }
+
+    function mainTableNotifyEndDisplay(item) {
+      if (item.channel === "APP春聯" && item.coupletEndDT) {
+        return formatNotifyWindowDisplay(item.coupletEndDT);
+      }
+      if (
+        (item.channel === "APP彈窗" || item.channel === "APP跑馬燈") &&
+        item.notifyWindowEnd
+      ) {
+        return formatNotifyWindowDisplay(item.notifyWindowEnd);
+      }
+      return "-";
+    }
+
+    function renderMainTableRows(pageRows) {
+      dom.mainTableBody.innerHTML = pageRows.map((item) => `
+        <tr>
+          <td>${escHtml(item.mapId)}</td>
+          <td>${escHtml(mainTableNotifyStartDisplay(item))}</td>
+          <td>${escHtml(mainTableNotifyEndDisplay(item))}</td>
+          <td class="title-preview-cell">
+            <button type="button" class="subject-link title-preview-text" data-message-id="${item.pk}" title="${escHtml(listNotifyTitleText(item))}">${escHtml(previewNotifyTitle(item))}</button>
+          </td>
+          <td>${escHtml(item.channel)}</td>
+          <td>${mainTableStatDash(item.channel) ?? item.totalCount}</td>
+          <td>${mainTableStatDash(item.channel) ?? item.failedCount}</td>
+          <td>${formatCreatorTableHtml(item)}</td>
+          <td>${mainTableStatDash(item.channel) ?? renderStatusBadge(item.status)}</td>
+          <td><button type="button" class="mini-btn" data-notification-id="${item.pk}">查看</button></td>
+        </tr>
+      `).join("");
+
+      dom.mainTableBody.querySelectorAll("[data-notification-id]").forEach((button) => {
+        button.addEventListener("click", () => openRecipientModal(button.dataset.notificationId));
+      });
+      dom.mainTableBody.querySelectorAll("[data-message-id]").forEach((button) => {
+        button.addEventListener("click", () => openMessageModal(button.dataset.messageId));
+      });
+    }
+
+    function renderMainTable() {
+      if (!state.main.hasSearched) {
+        dom.queryTime.textContent = "查詢時間：—";
+        dom.mainPagingInfo.innerHTML = `共有 <strong>0</strong> 筆資料`;
+        dom.mainTableBody.innerHTML = `
+          <tr>
+            <td colspan="10"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
+          </tr>
+        `;
+        dom.mainPageNav.innerHTML = "";
+        return;
+      }
+
+      const filtered = getFilteredNotifications();
+      const total = filtered.length;
+      const totalPages = total === 0 ? 0 : getTotalPages(total, state.main.pageSize);
+      if (totalPages > 0) {
+        state.main.page = Math.min(Math.max(1, state.main.page), totalPages);
+      } else {
+        state.main.page = 1;
+      }
+      dom.queryTime.textContent = `查詢時間：${formatNow()}`;
+      dom.mainPagingInfo.innerHTML = `共有 <strong>${total}</strong> 筆資料`;
+
+      if (total === 0) {
+        dom.mainTableBody.innerHTML = `
+          <tr>
+            <td colspan="10"><div class="empty">查無符合條件的通知紀錄。</div></td>
+          </tr>
+        `;
+        dom.mainPageNav.innerHTML = "";
+        return;
+      }
+
+      const pageRows = paginate(filtered, state.main.page, state.main.pageSize);
+      renderMainTableRows(pageRows);
+      renderCircularPageNav(dom.mainPageNav, state.main.page, totalPages, (page) => {
+        state.main.page = page;
+        renderMainTable();
+      });
+    }
+
+    function renderRecipientTable() {
+      if (!state.recipient.notification) {
+        return;
+      }
+
+      if (!state.recipient.hasSearched) {
+        dom.recipientPagingInfo.innerHTML = `共有 <strong>0</strong> 筆資料`;
+        dom.recipientTableBody.innerHTML = `
+          <tr>
+            <td colspan="5"><div class="empty">請輸入查詢條件後點選查詢。</div></td>
+          </tr>
+        `;
+        dom.recipientPageNav.innerHTML = "";
+        return;
+      }
+
+      const filtered = getFilteredRecipients();
+      const totalPages = getTotalPages(filtered.length, state.recipient.pageSize);
+      state.recipient.page = Math.min(state.recipient.page, totalPages);
+      const pageRows = paginate(filtered, state.recipient.page, state.recipient.pageSize);
+      dom.recipientPagingInfo.innerHTML = `共有 <strong>${filtered.length}</strong> 筆資料`;
+
+      if (!pageRows.length) {
+        dom.recipientTableBody.innerHTML = `
+          <tr>
+            <td colspan="5"><div class="empty">查無符合條件的傳送對象資料。</div></td>
+          </tr>
+        `;
+      } else {
+        const ch = state.recipient.notification.channel;
+        dom.recipientTableBody.innerHTML = pageRows.map((item) => `
+          <tr>
+            <td>${item.serial}</td>
+            <td>${item.idNo}</td>
+            <td>${item.name}</td>
+            <td>${item.account}</td>
+            <td>${recipientTableStatusCell(ch, item.status)}</td>
+          </tr>
+        `).join("");
+      }
+
+      renderCircularPageNav(dom.recipientPageNav, state.recipient.page, totalPages, (page) => {
+        state.recipient.page = page;
+        renderRecipientTable();
+      });
+    }
+
+    /**
+     * 產生分頁中間之頁碼與省略符（與常見後台分頁一致）。
+     * @returns {(number | "...")[]}
+     */
+    function buildPageNavItems(currentPage, totalPages) {
+      if (totalPages <= 0) {
+        return [];
+      }
+      if (totalPages <= 7) {
+        return Array.from({ length: totalPages }, (_, i) => i + 1);
+      }
+      const delta = 2;
+      const range = [];
+      for (let i = 1; i <= totalPages; i += 1) {
+        if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+          range.push(i);
+        }
+      }
+      const out = [];
+      let prev = 0;
+      for (const i of range) {
+        if (prev) {
+          if (i - prev === 2) {
+            out.push(prev + 1);
+          } else if (i - prev > 1) {
+            out.push("...");
+          }
+        }
+        out.push(i);
+        prev = i;
+      }
+      return out;
+    }
+
+    function renderCircularPageNav(container, currentPage, totalPages, onChange) {
+      container.innerHTML = "";
+      if (totalPages < 1) {
+        return;
+      }
+
+      const appendNav = (label, text, disabled, go) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `pager-ring pager-ring--nav${disabled ? " is-disabled" : ""}`;
+        btn.textContent = text;
+        btn.setAttribute("aria-label", label);
+        btn.disabled = disabled;
+        btn.addEventListener("click", () => {
+          if (!disabled) {
+            go();
+          }
+        });
+        container.appendChild(btn);
+      };
+
+      appendNav("最前頁", "«", currentPage === 1, () => onChange(1));
+      appendNav("上一頁", "‹", currentPage === 1, () => onChange(currentPage - 1));
+
+      buildPageNavItems(currentPage, totalPages).forEach((item) => {
+        if (item === "...") {
+          const span = document.createElement("span");
+          span.className = "pager-ring pager-ring--ellipsis";
+          span.textContent = "...";
+          span.setAttribute("aria-hidden", "true");
+          container.appendChild(span);
+        } else {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `pager-ring pager-ring--page${item === currentPage ? " is-active" : ""}`;
+          btn.textContent = String(item);
+          btn.setAttribute("aria-label", `第 ${item} 頁`);
+          btn.addEventListener("click", () => onChange(item));
+          container.appendChild(btn);
+        }
+      });
+
+      appendNav("下一頁", "›", currentPage === totalPages, () => onChange(currentPage + 1));
+      appendNav("最末頁", "»", currentPage === totalPages, () => onChange(totalPages));
+    }
+
+    function openRecipientModal(notificationId) {
+      const notification = notifications.find((item) => String(item.pk) === String(notificationId));
+      if (!notification) {
+        return;
+      }
+      state.recipient.notification = notification;
+      state.recipient.page = 1;
+      state.recipient.hasSearched = false;
+      state.recipient.filters = {
+        idNo: "",
+        name: ""
+      };
+      syncRecipientFiltersToDom();
+      dom.modalTitle.textContent = `傳送對象 | ${listNotifyTitleText(notification)}`;
+      const statPart = isChannelWithoutSendStats(notification.channel)
+        ? "-"
+        : notification.status;
+      dom.modalSubtitle.textContent = `MAP識別碼 ${notification.mapId} / 發送管道 ${notification.channel} / 發送狀態 ${statPart}`;
+      dom.recipientModal.classList.add("show");
+      renderRecipientTable();
+    }
+
+    function openMessageModal(notificationId) {
+      const notification = notifications.find((item) => String(item.pk) === String(notificationId));
+      if (!notification) {
+        return;
+      }
+      dom.messageModalTitle.textContent = messageModalHeadTitle(notification);
+      dom.messageModalFields.innerHTML = buildMessageModalHtml(notification);
+      if (notification.channel === "Email") {
+        const iframe = dom.messageModalFields.querySelector("#messageEmailPreviewIframe");
+        if (iframe) {
+          iframe.srcdoc = wrapEmailHtmlForIframeSrcdoc(notification.content, notification.subject);
+        }
+      }
+      dom.messageModal.classList.add("show");
+    }
+
+    function closeMessageModal() {
+      dom.messageModal.classList.remove("show");
+      dom.messageModalFields.innerHTML = "";
+    }
+
+    function closeRecipientModal() {
+      dom.recipientModal.classList.remove("show");
+      state.recipient.notification = null;
+    }
+
+    function getFilteredNotifications() {
+      if (!state.main.hasSearched) {
+        return [];
+      }
+      const filters = state.main.filters;
+      return notifications.filter((item) => {
+        const mapQ = filters.mapId.trim().toUpperCase();
+        const mapOk = !mapQ || String(item.mapId).toUpperCase().includes(mapQ);
+        if (!mapOk) {
+          return false;
+        }
+        const idQ = filters.idNo.trim();
+        if (idQ && !item.recipients.some((r) => includesText(r.idNo, idQ))) {
+          return false;
+        }
+        if (!matchesNotifyTimeRange(item, filters.notifyStart, filters.notifyEnd)) {
+          return false;
+        }
+        if (!matchesTitleKeyword(item, filters.titleKeyword)) {
+          return false;
+        }
+        return (
+          matchSelect(item.channel, filters.channel) &&
+          matchSelect(item.status, filters.status) &&
+          includesText(creatorSearchText(item), filters.creator)
+        );
+      });
+    }
+
+    /**
+     * 傳送對象清單排序：證券帳號、身分證、姓名皆依 A–Z／0–9（含數字區段）遞增；最後以序號穩定排序。
+     */
+    function compareRecipientsAlphanumeric(a, b) {
+      const opts = { numeric: true, sensitivity: "base" };
+      const byAccount = String(a.account ?? "").localeCompare(String(b.account ?? ""), "zh-Hant", opts);
+      if (byAccount !== 0) {
+        return byAccount;
+      }
+      const byId = String(a.idNo ?? "").localeCompare(String(b.idNo ?? ""), "zh-Hant", opts);
+      if (byId !== 0) {
+        return byId;
+      }
+      const byName = String(a.name ?? "").localeCompare(String(b.name ?? ""), "zh-Hant", opts);
+      if (byName !== 0) {
+        return byName;
+      }
+      return (a.serial || 0) - (b.serial || 0);
+    }
+
+    function getFilteredRecipients() {
+      const notification = state.recipient.notification;
+      if (!notification || !state.recipient.hasSearched) {
+        return [];
+      }
+      const filters = state.recipient.filters;
+      return notification.recipients
+        .filter((item) => (
+          includesText(item.idNo, filters.idNo) &&
+          includesText(item.name, filters.name)
+        ))
+        .sort(compareRecipientsAlphanumeric);
+    }
+
+    function syncMainFiltersFromDom() {
+      state.main.filters = {
+        mapId: dom.mainMapId.value.trim(),
+        idNo: dom.mainIdNo.value.trim(),
+        notifyStart: dom.mainNotifyStart.value,
+        notifyEnd: dom.mainNotifyEnd.value,
+        titleKeyword: dom.mainTitleKeyword.value.trim(),
+        channel: dom.mainChannel.value,
+        status: dom.mainStatus.value,
+        creator: dom.mainCreator.value.trim()
+      };
+    }
+
+    function syncMainFiltersToDom() {
+      dom.mainMapId.value = state.main.filters.mapId;
+      dom.mainIdNo.value = state.main.filters.idNo;
+      dom.mainNotifyStart.value = state.main.filters.notifyStart;
+      dom.mainNotifyEnd.value = state.main.filters.notifyEnd;
+      dom.mainTitleKeyword.value = state.main.filters.titleKeyword;
+      dom.mainChannel.value = state.main.filters.channel;
+      dom.mainStatus.value = state.main.filters.status;
+      dom.mainCreator.value = state.main.filters.creator;
+    }
+
+    function syncRecipientFiltersFromDom() {
+      state.recipient.filters = {
+        idNo: dom.recipientIdNo.value.trim(),
+        name: dom.recipientName.value.trim()
+      };
+    }
+
+    function syncRecipientFiltersToDom() {
+      dom.recipientIdNo.value = state.recipient.filters.idNo;
+      dom.recipientName.value = state.recipient.filters.name;
+    }
+
+    function fillSelect(element, options) {
+      element.innerHTML = options.map((option) => `<option value="${option}">${option}</option>`).join("");
+    }
+
+    function matchSelect(value, filterValue) {
+      return filterValue === "全部" || value === filterValue;
+    }
+
+    function includesText(value, keyword) {
+      return !keyword || String(value).toLowerCase().includes(keyword.toLowerCase());
+    }
+
+    /**
+     * 主表「建立者」：第一行姓名、第二行 PK + 數字（buildMockData 寫入 creatorName／creatorPk）。
+     * 若僅有舊欄位 creator（字串），則整段當作第一行以利相容。
+     */
+    function getCreatorParts(item) {
+      let name = item.creatorName != null ? String(item.creatorName) : "";
+      let pk = item.creatorPk != null ? String(item.creatorPk) : "";
+      name = name.trim();
+      pk = pk.trim();
+      if (!name && !pk && item.creator) {
+        name = String(item.creator).trim();
+      }
+      return { name, pk };
+    }
+
+    function creatorSearchText(item) {
+      const { name, pk } = getCreatorParts(item);
+      return `${name} ${pk}`.trim();
+    }
+
+    function formatCreatorTableHtml(item) {
+      const { name, pk } = getCreatorParts(item);
+      if (!name && !pk) {
+        return "-";
+      }
+      const parts = [];
+      if (name) {
+        parts.push(`<div class="creator-cell__line">${escHtml(name)}</div>`);
+      }
+      if (pk) {
+        parts.push(`<div class="creator-cell__line creator-cell__pk">${escHtml(pk)}</div>`);
+      }
+      return `<div class="creator-cell">${parts.join("")}</div>`;
+    }
+
+    function formatCreatorCsvValue(item) {
+      const { name, pk } = getCreatorParts(item);
+      if (!name && !pk) {
+        return "-";
+      }
+      return pk ? `${name}\n${pk}` : name;
+    }
+
+    function paginate(rows, page, pageSize) {
+      const start = (page - 1) * pageSize;
+      return rows.slice(start, start + pageSize);
+    }
+
+    function getTotalPages(total, pageSize) {
+      return Math.max(1, Math.ceil(total / pageSize));
+    }
+
+    function renderStatusBadge(status) {
+      const classMap = {
+        "成功": "status-chip status-success",
+        "失敗": "status-chip status-danger"
+      };
+      return `<span class="${classMap[status] || "status-chip"}">${status}</span>`;
+    }
+
+    function csvField(value) {
+      if (value === undefined || value === null) {
+        return "";
+      }
+      return String(value);
+    }
+
+    /**
+     * 匯出主清單 CSV：欄位順序與表頭依產品規格固定；非該管道之欄位為空字串。
+     * 圖片URL：APP彈窗附圖優先，否則 line@ 附圖 URL。
+     */
+    function mapMainRows(rows) {
+      return rows.map((item) => {
+        const imageUrl = item.appPopupImageUrl || item.lineImageUrl || "";
+        const dash = mainTableStatDash(item.channel);
+        return {
+          MAP識別碼: item.mapId,
+          通知開始時間: mainTableNotifyStartDisplay(item),
+          通知結束時間: mainTableNotifyEndDisplay(item),
+          通知標題: previewNotifyTitle(item),
+          通知主旨: item.subject,
+          通知內文: item.content,
+          到達網頁: csvField(item.landingUrl),
+          圖片URL: csvField(imageUrl),
+          跑馬燈內部名稱: csvField(item.internalName),
+          跑馬燈內文: csvField(item.tickerContent),
+          LON說明: csvField(item.lonDescription),
+          LON資訊欄: csvField(item.lonInfoField),
+          LON註冊內容: csvField(item.lonRegisterContent),
+          LON註冊時間: csvField(item.lonRegisterTime),
+          LON按鈕網址: csvField(item.lonButtonUrl),
+          LON按鈕文字: csvField(item.lonButtonText),
+          JSON: csvField(item.lineJson),
+          發送管道: item.channel,
+          發送總數: dash ?? item.totalCount,
+          發送失敗數: dash ?? item.failedCount,
+          建立者: formatCreatorCsvValue(item),
+          發送狀態: dash ?? item.status
+        };
+      });
+    }
+
+    function mapRecipientRows(rows) {
+      const channel = state.recipient.notification ? state.recipient.notification.channel : "";
+      return rows.map((item) => ({
+        序號: item.serial,
+        身分證: item.idNo,
+        姓名: item.name,
+        證券帳號: item.account,
+        發送狀態: isChannelWithoutSendStats(channel) ? "-" : csvField(item.status)
+      }));
+    }
+
+    function exportCsv(filename, rows) {
+      if (!rows.length) {
+        showGuild3Reminder("提醒", "目前沒有可匯出的資料。");
+        return;
+      }
+      const headers = Object.keys(rows[0]);
+      const csv = [
+        headers.join(","),
+        ...rows.map((row) => headers.map((header) => escapeCsv(row[header])).join(","))
+      ].join("\n");
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeCsv(value) {
+      return `"${String(value ?? "").replaceAll("\"", "\"\"")}"`;
+    }
+
+    function formatNow() {
+      const date = new Date();
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      const hh = String(date.getHours()).padStart(2, "0");
+      const mi = String(date.getMinutes()).padStart(2, "0");
+      const ss = String(date.getSeconds()).padStart(2, "0");
+      return `${yyyy}/${mm}/${dd} ${hh}:${mi}:${ss}`;
+    }
+
+    function buildMapId(index) {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let s = "";
+      for (let i = 0; i < 5; i += 1) {
+        s += chars[(index * 13 + i * 7) % chars.length];
+      }
+      return s;
+    }
+
+    function buildMockData() {
+      const channelPool = [
+        "APP離線推播",
+        "APP春聯",
+        "APP彈窗",
+        "APP跑馬燈",
+        "簡訊",
+        "LON",
+        "line@",
+        "Email"
+      ];
+      const creatorPool = ["王小明", "李雅婷", "客服中心", "系統管理員", "營運排程"];
+      const sourcePool = ["後台手動", "系統排程", "會員事件", "帳務批次"];
+      const notifyTitles = [
+        "會員升等通知",
+        "信用卡扣款提醒",
+        "活動報名成功通知",
+        "系統維護公告",
+        "紅利點數到期提醒",
+        "帳號安全驗證通知",
+        "生日優惠券發送",
+        "出貨進度更新",
+        "繳費逾期提醒",
+        "春季活動開跑通知"
+      ];
+      const subjects = [
+        "恭喜您升等啦",
+        "敬請留意本期帳款",
+        "您的報名已經完成",
+        "維護時段公告",
+        "點數即將到期提醒",
+        "請完成安全驗證",
+        "生日禮已入帳",
+        "包裹狀態有更新",
+        "請儘速完成繳費",
+        "春季特惠開跑囉"
+      ];
+      const contentTemplates = [
+        "親愛的會員您好，您的會員等級已升等至黃金會員，相關權益請至會員中心查看。",
+        "親愛的會員您好，系統已為您完成通知發送，請留意最新訊息與後續作業說明。",
+        "本次通知內容包含重要權益異動，建議登入會員中心查看完整細節與注意事項。",
+        "若您收到此通知，代表您的帳務或活動資格已有更新，請儘速確認避免影響使用權益。",
+        "系統將依據您的帳號狀態進行後續處理，如有疑問請洽客服中心協助查詢。"
+      ];
+
+      const pocketSurveyEmailHtml = `<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;Arial Unicode MS&quot;">【2 分鐘填問卷就抽「牛牛造型杯墊」，口袋證券邀請您參加存股大調查】</span></span></strong></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">最好的投資時機永遠是從「現在」開始，讓時間複利的魔法，陪你的錢包穩穩長大！✨</span></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">在這條存股路上，我們希望能聽聽您的心聲，陪您走得更穩、更遠。<strong>現在只要點擊下方連結，花 2 分鐘完成「存股大調查」問卷</strong> ，就有機會把萌到爆表的「口袋牛牛造型杯墊」抽回家！ 限量 50 名，讓超萌牛牛療癒您的桌面日常吧！</span></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;新細明體&quot;,serif">👉 立即填寫問卷： </span></span></strong><span style="font-family:&quot;新細明體&quot;,serif"><a href="https://www.pocket.tw/piggybank/?page=6"><strong><span style="font-size:12.0pt"><span style="color:#1155cc">https://www.pocket.tw/piggybank/?page=6</span></span></strong></a></span><strong> </strong></span></span></p>
+<ul>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">活動期間：即日起至 2026/04/17 止。</span></span></span></li>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">活動對象：僅限收到信件之指定存股用戶參與，每人限填乙次。</span></span></span></li>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">活動方式：完整填寫問卷並成功送出，即可獲得抽獎機會。</span></span></span></li>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">活動好禮：口袋牛牛造型杯墊（限量 50 名）。</span></span></span></li>
+	<li><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><span style="font-family:&quot;Arial Unicode MS&quot;">公告與領獎：中獎名單與寄送方式將於 2026 年 5 月 8 日前公告於官網。</span></span></span></li>
+</ul>
+<p style="margin-left:0cm; margin-right:0cm">&nbsp;</p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;Arial Unicode MS&quot;">讓我們一起運用複利的魔法，打造更好的投資體驗！</span></span></strong></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;Arial Unicode MS&quot;">口袋證券團隊 敬上</span></span></strong></span></span></p>
+<p style="margin-left:0cm; margin-right:0cm"><span style="font-size:11pt"><span style="font-family:Arial,sans-serif"><strong><span style="font-size:12.0pt"><span style="font-family:&quot;新細明體&quot;,serif"><img src="圖片地址 " alt="" style="height:339px; width:601px" /></span></span></strong></span></span></p>`;
+
+      return Array.from({ length: 28 }, (_, index) => {
+        const pk = 10001 + index;
+        const channel = channelPool[index % channelPool.length];
+        const totalCount = 18 + (index % 7) * 9;
+        const failedCount = index % 4 === 0 ? 0 : 1 + (index % 5);
+        const status = failedCount > 0 ? "失敗" : "成功";
+        const month = String((index % 3) + 1).padStart(2, "0");
+        const day = String((index % 9) + 1).padStart(2, "0");
+        const hour = String(9 + (index % 8)).padStart(2, "0");
+        const minute = String((index * 7) % 60).padStart(2, "0");
+        const notifyDate = `2026-${month}-${day}`;
+        const notifyTime = `${notifyDate} ${hour}:${minute}:00`;
+        const i = index % notifyTitles.length;
+        const mapId = buildMapId(index);
+        let notifyTitle = notifyTitles[i];
+        let subject = subjects[i];
+        let content = contentTemplates[index % contentTemplates.length];
+
+        let landingUrl = "";
+        let internalName = "";
+        let tickerContent = "";
+        let marqueeTargetUrl = "";
+        let appPopupTargetUrl = "";
+        let appPopupImageUrl = "";
+        let lonSubject = "";
+        let lonDescription = "";
+        let lonInfoField = "";
+        let lonRegisterContent = "";
+        let lonRegisterTime = "";
+        let lonButtonUrl = "";
+        let lonButtonText = "";
+        let lineTextBody = "";
+        let lineJson = "";
+        let lineImageUrl = "";
+        let notifyWindowStart = "";
+        let notifyWindowEnd = "";
+
+        if (channel === "APP離線推播" || channel === "APP春聯") {
+          landingUrl = `https://www.example.com/app/landing?batch=${pk}`;
+        } else if (channel === "APP彈窗") {
+          appPopupTargetUrl = `https://www.example.com/popup/${mapId}`;
+          if (index % 3 === 0) {
+            appPopupImageUrl = `https://picsum.photos/seed/popup${pk}/480/320`;
+          }
+          notifyWindowStart = `${notifyDate}T${hour}:${minute}:00`;
+          const popEndDay = String(Math.min(Number(day) + 2, 28)).padStart(2, "0");
+          notifyWindowEnd = `2026-${month}-${popEndDay}T23:59:00`;
+        } else if (channel === "APP跑馬燈") {
+          internalName = `跑馬燈_${mapId}_${notifyTitles[i].slice(0, 4)}`;
+          tickerContent = `${subject}　｜　詳情請於 App 內點選連結（示意）`;
+          marqueeTargetUrl = `https://www.example.com/m/${mapId}`;
+          notifyWindowStart = `${notifyDate}T${hour}:${minute}:00`;
+          const marEndDay = String(Math.min(Number(day) + 1, 28)).padStart(2, "0");
+          notifyWindowEnd = `2026-${month}-${marEndDay}T23:59:59`;
+        } else if (channel === "LON") {
+          const lonUnified = "LON 推播統一訊息：重要公告請留意帳戶狀態與最新權益說明。";
+          notifyTitle = lonUnified;
+          subject = lonUnified;
+          content = lonUnified;
+          lonSubject = subject;
+          lonDescription = "說明：本期權益調整與注意事項摘要（示意）。";
+          lonInfoField = "年利率 3.5% · 額度 NT$200,000 · 期間至 2026/12/31（示意）";
+          lonRegisterContent = "註冊內容：已完成推播服務註冊與條款同意（示意）。";
+          lonRegisterTime = notifyTime;
+          lonButtonUrl = "https://www.example.com/lon/detail";
+          lonButtonText = "查看詳情";
+        } else if (channel === "line@") {
+          const mode = index % 3;
+          if (mode === 0) {
+            lineJson = JSON.stringify(
+              { type: "bubble", altText: "示意推播", body: { type: "box", layout: "vertical", contents: [] } },
+              null,
+              2
+            );
+            notifyTitle = "";
+            subject = "";
+            content = "";
+          } else if (mode === 1) {
+            lineImageUrl = `https://picsum.photos/seed/line${pk}/520/240`;
+            notifyTitle = "";
+            subject = "";
+            content = "";
+          } else {
+            lineTextBody = content;
+          }
+        } else if (channel === "Email") {
+          subject = "【2 分鐘填問卷就抽「牛牛造型杯墊」，口袋證券邀請您參加存股大調查】";
+          notifyTitle = subject;
+          content = pocketSurveyEmailHtml;
+        }
+
+        const hasCreator = index % 7 !== 0;
+        const creatorName = hasCreator ? creatorPool[index % creatorPool.length] : "";
+        const creatorPk = hasCreator ? `PK${String(pk - 10000).padStart(3, "0")}` : "";
+        const source = sourcePool[index % sourcePool.length];
+        const batchNo = `BATCH-2026${month}${day}-${String(index + 1).padStart(3, "0")}`;
+        const coupletStartDT = channel === "APP春聯" ? `${notifyDate}T${hour}:${minute}:00` : "";
+        const endDay = String(Math.min(Number(day) + 5, 28)).padStart(2, "0");
+        const coupletEndDT = channel === "APP春聯" ? `2026-${month}-${endDay}T23:59:00` : "";
+
+        if (channel === "簡訊") {
+          notifyTitle = "";
+          subject = "";
+        }
+
+        return {
+          mapId,
+          pk,
+          notifyDate,
+          notifyTime,
+          notifyTitle,
+          subject,
+          content,
+          channel,
+          totalCount,
+          failedCount,
+          creatorName,
+          creatorPk,
+          source,
+          status,
+          batchNo,
+          coupletStartDT,
+          coupletEndDT,
+          landingUrl,
+          internalName,
+          tickerContent,
+          marqueeTargetUrl,
+          appPopupTargetUrl,
+          appPopupImageUrl,
+          lonSubject,
+          lonDescription,
+          lonInfoField,
+          lonRegisterContent,
+          lonRegisterTime,
+          lonButtonUrl,
+          lonButtonText,
+          lineTextBody,
+          lineJson,
+          lineImageUrl,
+          notifyWindowStart,
+          notifyWindowEnd,
+          recipients: buildRecipients(pk, totalCount, failedCount, status)
+        };
+      });
+    }
+
+    function buildRecipients(notificationPk, totalCount, failedCount, parentStatus) {
+      return Array.from({ length: totalCount }, (_, index) => {
+        const pk = `${notificationPk}${String(index + 1).padStart(3, "0")}`;
+        const status = parentStatus === "失敗" && index < failedCount ? "失敗" : "成功";
+
+        return {
+          serial: index + 1,
+          pk,
+          idNo: `${String.fromCharCode(65 + (index % 26))}12${String(notificationPk).slice(-2)}${String(index + 1).padStart(4, "0")}`,
+          name: `測試使用者${index + 1}`,
+          account: `user_${notificationPk}_${String(index + 1).padStart(2, "0")}`,
+          status
+        };
+      });
+    }
+
+  </script>
+</body>
+</html>
